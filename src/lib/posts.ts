@@ -64,7 +64,6 @@ async function queryDatabase(
 
     if (!notionPostsClient || !databaseId) {
         console.error('NOTION_POSTS_API_KEY or NOTION_POSTS_DATABASE_ID is not configured.');
-        // Return a structure that matches what the caller expects, but is empty.
         return { results: [], next_cursor: null, has_more: false, type: 'page_or_database', page_or_database: {} };
     }
 
@@ -79,7 +78,6 @@ async function queryDatabase(
         return response;
     } catch (error: any) {
         console.error(`Error querying Notion database (ID: ${databaseId}):`, error.message);
-        // In case of error, return an empty structure to avoid crashing consumers.
         return { results: [], next_cursor: null, has_more: false, type: 'page_or_database', page_or_database: {} };
     }
 }
@@ -89,7 +87,7 @@ export async function getPublishedPosts({
     tag, 
     query,
     page = 1,
-    pageSize = 6,
+    pageSize = 100,
 }: { 
     tag?: string;
     query?: string;
@@ -119,7 +117,7 @@ export async function getPublishedPosts({
     const response = await queryDatabase(
         { and: filters },
         [{ property: 'PublishedDate', direction: 'descending' }],
-        100 // Fetch all posts up to Notion's limit
+        pageSize
     );
     
     const allPosts = response.results
@@ -173,7 +171,7 @@ export async function getPublishedPages(): Promise<Post[]> {
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
-    const notionPostsClient = process.env.NOTION_POSTS_API_KEY ? new Client({ auth: process.env.NOTION_POSTS_API_KEY }) : null;
+    const notionPostsClient = new Client({ auth: process.env.NOTION_POSTS_API_KEY });
     const postsDatabaseId = process.env.NOTION_POSTS_DATABASE_ID;
 
     if (!notionPostsClient || !postsDatabaseId) {
