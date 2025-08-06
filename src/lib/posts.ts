@@ -81,7 +81,7 @@ async function queryDatabase(filter?: any, sorts?: any) {
 }
 
 
-export async function getPublishedPosts({ tag }: { tag?: string } = {}): Promise<Post[]> {
+export async function getPublishedPosts({ tag, query }: { tag?: string, query?: string } = {}): Promise<Post[]> {
   const filters: any[] = [
     {
       property: 'Type',
@@ -98,6 +98,25 @@ export async function getPublishedPosts({ tag }: { tag?: string } = {}): Promise
         contains: tag,
       },
     });
+  }
+
+  if (query) {
+    filters.push({
+        or: [
+            {
+                property: 'Title',
+                rich_text: {
+                    contains: query,
+                },
+            },
+            {
+                property: 'Excerpt',
+                rich_text: {
+                    contains: query,
+                },
+            },
+        ],
+    })
   }
 
   try {

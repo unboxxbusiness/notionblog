@@ -5,24 +5,25 @@ import { Badge } from '@/components/ui/badge';
 import { TagFilters } from '@/components/tag-filters';
 import { Suspense } from 'react';
 import { HomeHero } from '@/components/home-hero';
+import { SearchInput } from '@/components/search-input';
 
-function PostsGrid({ tag }: { tag?: string }) {
+function PostsGrid({ tag, query }: { tag?: string; query?: string }) {
   return (
     <Suspense fallback={<PostsSkeleton />}>
-      <PostsGridContent tag={tag} />
+      <PostsGridContent tag={tag} query={query} />
     </Suspense>
   )
 }
 
-async function PostsGridContent({ tag }: { tag?: string }) {
-  const posts = await getPublishedPosts({ tag });
+async function PostsGridContent({ tag, query }: { tag?: string, query?: string }) {
+  const posts = await getPublishedPosts({ tag, query });
 
   if (posts.length === 0) {
     return (
       <div className="text-center py-16">
         <h2 className="font-headline text-2xl font-semibold">No posts found</h2>
         <p className="text-muted-foreground mt-2">
-          There are no posts with the tag &quot;{tag}&quot;.
+            Your search for &quot;{query || tag}&quot; did not return any results.
         </p>
         <Link href="/" className="mt-4 inline-block">
             <Badge variant="default" className="px-4 py-2 text-sm">Back to All Posts</Badge>
@@ -59,9 +60,10 @@ function PostsSkeleton() {
 export default async function Home({
   searchParams,
 }: {
-  searchParams?: { tag?: string };
+  searchParams?: { tag?: string; q?: string };
 }) {
   const currentTag = searchParams?.tag;
+  const currentQuery = searchParams?.q;
   const allTags = await getAllTags();
   
   return (
@@ -71,11 +73,14 @@ export default async function Home({
       </Suspense>
 
       <section className="my-12">
+        <div className="mb-8 max-w-md mx-auto">
+            <SearchInput />
+        </div>
         <Suspense fallback={null}>
             <TagFilters tags={allTags} />
         </Suspense>
 
-        <PostsGrid tag={currentTag} />
+        <PostsGrid tag={currentTag} query={currentQuery} />
         
       </section>
     </div>
