@@ -70,7 +70,7 @@ export default async function PostPage({ params }: PostPageProps) {
         <PostRenderer recordMap={post.recordMap} />
       </div>
 
-      <div className="mt-16 border-t pt-8">
+      <div className="mt-16 border-t pt-8 max-w-2xl mx-auto">
           <SuggestSummaryForm />
       </div>
     </article>

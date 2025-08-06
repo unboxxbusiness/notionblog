@@ -27,7 +27,9 @@ export function PostRenderer({ recordMap }: { recordMap: RecordMap }) {
       className="prose dark:prose-invert max-w-none 
                  prose-headings:font-headline prose-p:text-foreground/80
                  prose-a:text-primary hover:prose-a:text-primary/80 prose-strong:text-foreground
-                 prose-blockquote:border-primary prose-blockquote:text-foreground/70"
+                 prose-blockquote:border-primary prose-blockquote:text-foreground/70
+                 mx-auto
+                 prose-img:mx-auto prose-table:mx-auto prose-code:mx-auto"
     />
   );
 }
