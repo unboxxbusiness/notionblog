@@ -38,7 +38,7 @@ export function Header({ tags, pages }: { tags: string[], pages: Post[] }) {
                     <NavigationMenu className="flex justify-start items-start">
                         <NavigationMenuList className="flex justify-start gap-4 flex-row">
                             <NavigationMenuItem>
-                                <Link href="/" passHref>
+                                <Link href="/" legacyBehavior passHref>
                                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                                         Home
                                     </NavigationMenuLink>
@@ -62,7 +62,7 @@ export function Header({ tags, pages }: { tags: string[], pages: Post[] }) {
                                                 </div>
                                                 <div className="flex flex-col text-sm h-full">
                                                     {item.items?.map((subItem) => (
-                                                        <Link href={subItem.href} passHref key={subItem.title}>
+                                                        <Link href={subItem.href} passHref key={subItem.title} legacyBehavior>
                                                             <NavigationMenuLink
                                                                 className="flex flex-row justify-between items-center hover:bg-muted py-2 px-4 rounded"
                                                             >
