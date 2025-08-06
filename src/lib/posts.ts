@@ -78,6 +78,21 @@ async function queryDatabase(
         return response;
     } catch (error: any) {
         console.error(`Error querying Notion database (ID: ${databaseId}):`, error.message);
+        if (error.code === 'validation_error') {
+            console.warn(`Notion API validation error: ${error.message}. This may be due to missing properties in your Notion database. Retrying without filters/sorts...`);
+            try {
+                // Retry without filters and sorts as a fallback
+                const retryResponse = await notionPostsClient.databases.query({
+                    database_id: databaseId,
+                    page_size: pageSize,
+                    start_cursor: startCursor,
+                });
+                return retryResponse;
+            } catch (retryError: any) {
+                console.error('Error retrying Notion query:', retryError.message);
+                return { results: [], next_cursor: null, has_more: false, type: 'page_or_database', page_or_database: {} };
+            }
+        }
         return { results: [], next_cursor: null, has_more: false, type: 'page_or_database', page_or_database: {} };
     }
 }
@@ -114,10 +129,13 @@ export async function getPublishedPosts({
   }
 
   try {
+    // Note: Notion API doesn't provide a total count for a query.
+    // We fetch all posts and then paginate them in memory.
+    // For very large blogs, a cursor-based approach would be better, but this is simpler.
     const response = await queryDatabase(
         { and: filters },
         [{ property: 'PublishedDate', direction: 'descending' }],
-        pageSize
+        100 // Fetch up to 100 posts
     );
     
     const allPosts = response.results
@@ -145,7 +163,10 @@ export async function getLatestPost(): Promise<Post | null> {
             1
         );
         const post = response.results[0];
-        return post && 'properties' in post ? pageToPost(post) : null;
+        if (post && 'properties' in post) {
+            return pageToPost(post);
+        }
+        return null;
     } catch (e) {
         console.error("Could not fetch latest post.", e);
         return null;
