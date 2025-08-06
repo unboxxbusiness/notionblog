@@ -33,6 +33,7 @@ function pageToPost(page: PageObjectResponse): Post {
     }
 
     const tags = (page.properties.Tags as any)?.multi_select?.map((tag: any) => tag.name) || [];
+    const type = (page.properties.Type as any)?.select?.name;
 
     return {
         id: page.id,
@@ -45,7 +46,7 @@ function pageToPost(page: PageObjectResponse): Post {
         featuredImageHint: 'notion content',
         excerpt: (page.properties.Excerpt as any)?.rich_text?.[0]?.plain_text || '',
         content: page.id, // We'll fetch content using this ID
-        type: (page.properties.Type as any)?.select?.name === 'page' ? 'page' : 'post',
+        type: type === 'page' ? 'page' : 'post',
     };
 }
 
@@ -60,16 +61,17 @@ async function queryDatabase(filter?: any, sorts?: any) {
             .filter((page): page is PageObjectResponse => 'properties' in page)
             .map(pageToPost);
     } catch (error: any) {
-        // If the sort property doesn't exist, Notion throws an error.
-        // We can catch it and try again without sorting.
-        if (error.code === 'validation_error' && error.message.includes('sort property')) {
-             const response: QueryDatabaseResponse = await notionClient.databases.query({
-                database_id: databaseId,
-                filter,
-            });
-            return response.results
-                .filter((page): page is PageObjectResponse => 'properties' in page)
-                .map(pageToPost);
+        // If a sort or filter property doesn't exist, Notion throws an error.
+        // We can catch it and try again without the problematic parts.
+        if (error.code === 'validation_error') {
+            if (error.message.includes('sort property')) {
+                // Retry without sorting
+                return queryDatabase(filter, undefined);
+            }
+            if (error.message.includes('property') && filter) {
+                 // Retry without filtering
+                 return queryDatabase(undefined, sorts);
+            }
         }
         // If it's a different error, we still want to know about it.
         console.error("Error querying Notion database:", error);
@@ -79,30 +81,27 @@ async function queryDatabase(filter?: any, sorts?: any) {
 
 
 export async function getPublishedPosts(): Promise<Post[]> {
-  const posts = await queryDatabase(
-    {
-      property: 'Type',
-      select: {
-        equals: 'post',
-      },
-    },
-    [
+  try {
+    return await queryDatabase(
       {
-        property: 'PublishedDate',
-        direction: 'descending',
+        property: 'Type',
+        select: {
+          equals: 'post',
+        },
       },
-    ]
-  );
-  // Fallback to fetching all entries if Type property doesn't exist
-  if (posts.length === 0) {
-    return queryDatabase(undefined, [
+      [
         {
           property: 'PublishedDate',
           direction: 'descending',
         },
-      ]);
+      ]
+    );
+  } catch (e) {
+    // If the initial query fails (e.g., missing Type or PublishedDate property),
+    // try fetching all documents without filtering or sorting.
+    console.warn("Could not fetch filtered or sorted posts, falling back to all documents.", e)
+    return queryDatabase();
   }
-  return posts;
 }
 
 export async function getPublishedPages(): Promise<Post[]> {
