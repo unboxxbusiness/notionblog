@@ -6,9 +6,11 @@ import Link from 'next/link'
 import type { Post } from '@/lib/types'
 import { ThemeToggle } from './theme-toggle'
 import { cn } from '@/lib/utils'
-import { useTheme } from 'next-themes'
-import { Tag, FileText, Search } from 'lucide-react'
+import { Tag, FileText, Search, Menu as MenuIcon, X } from 'lucide-react'
 import { NavbarSearchInput } from './navbar-search-input'
+import { Button } from './ui/button';
+import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 
 const transition = {
   type: 'spring',
@@ -67,7 +69,7 @@ const MenuItem = ({
   )
 }
 
-const Menu = ({
+const DesktopMenu = ({
   setActive,
   children,
 }: {
@@ -110,45 +112,110 @@ export function Navbar({
   const [active, setActive] = useState<string | null>(null)
 
   return (
-    <div className="w-full z-40 fixed top-0 left-0 flex justify-center py-6">
-      <Menu setActive={setActive}>
+    <div className="w-full z-40 fixed top-0 left-0 flex justify-center py-6 px-4 md:px-6">
+      {/* Desktop Navbar */}
+      <div className="hidden md:flex w-full justify-center">
+        <DesktopMenu setActive={setActive}>
+          <Link
+            href="/"
+            className="cursor-pointer text-foreground hover:opacity-[0.9] flex items-center font-bold font-headline text-lg"
+          >
+            Muse
+          </Link>
+          <MenuItem setActive={setActive} active={active} item="Tags">
+            <div className="flex flex-col space-y-4 text-sm">
+              {tags.map(tag => (
+                <HoveredLink
+                  key={tag}
+                  href={`/?tag=${encodeURIComponent(tag)}`}
+                  icon={Tag}
+                >
+                  {tag}
+                </HoveredLink>
+              ))}
+            </div>
+          </MenuItem>
+          <MenuItem setActive={setActive} active={active} item="Pages">
+            <div className="flex flex-col space-y-4 text-sm">
+              {pages.map(page => (
+                <HoveredLink
+                  key={page.id}
+                  href={`/${page.slug}`}
+                  icon={FileText}
+                >
+                  {page.title}
+                </HoveredLink>
+              ))}
+            </div>
+          </MenuItem>
+          <MenuItem setActive={setActive} active={active} item="Search">
+            <NavbarSearchInput />
+          </MenuItem>
+          <ThemeToggle />
+        </DesktopMenu>
+      </div>
+
+      {/* Mobile Navbar */}
+      <div className="md:hidden flex justify-between items-center w-full rounded-full border bg-background/50 shadow-input px-4 py-2 backdrop-blur-md">
         <Link
           href="/"
           className="cursor-pointer text-foreground hover:opacity-[0.9] flex items-center font-bold font-headline text-lg"
         >
           Muse
         </Link>
-        <MenuItem setActive={setActive} active={active} item="Tags">
-          <div className="flex flex-col space-y-4 text-sm">
-            {tags.map(tag => (
-              <HoveredLink
-                key={tag}
-                href={`/?tag=${encodeURIComponent(tag)}`}
-                icon={Tag}
-              >
-                {tag}
-              </HoveredLink>
-            ))}
-          </div>
-        </MenuItem>
-        <MenuItem setActive={setActive} active={active} item="Pages">
-          <div className="flex flex-col space-y-4 text-sm">
-            {pages.map(page => (
-              <HoveredLink
-                key={page.id}
-                href={`/${page.slug}`}
-                icon={FileText}
-              >
-                {page.title}
-              </HoveredLink>
-            ))}
-          </div>
-        </MenuItem>
-        <MenuItem setActive={setActive} active={active} item="Search">
-          <NavbarSearchInput />
-        </MenuItem>
-        <ThemeToggle />
-      </Menu>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MenuIcon />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <div className="p-4">
+                <div className="mb-8">
+                  <NavbarSearchInput />
+                </div>
+                <Accordion type="multiple" className="w-full">
+                  <AccordionItem value="tags">
+                    <AccordionTrigger>Tags</AccordionTrigger>
+                    <AccordionContent>
+                      <div className="flex flex-col space-y-4 text-sm mt-2">
+                        {tags.map(tag => (
+                          <HoveredLink
+                            key={tag}
+                            href={`/?tag=${encodeURIComponent(tag)}`}
+                            icon={Tag}
+                          >
+                            {tag}
+                          </HoveredLink>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="pages">
+                    <AccordionTrigger>Pages</AccordionTrigger>
+                    <AccordionContent>
+                    <div className="flex flex-col space-y-4 text-sm mt-2">
+                        {pages.map(page => (
+                        <HoveredLink
+                            key={page.id}
+                            href={`/${page.slug}`}
+                            icon={FileText}
+                        >
+                            {page.title}
+                        </HoveredLink>
+                        ))}
+                    </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
     </div>
   )
 }
