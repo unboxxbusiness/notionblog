@@ -9,8 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { subscribeToAction, type FormState } from '@/app/actions/subscribe';
-import { useFormState } from 'react-dom';
-import { useEffect } from 'react';
+import { useActionState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
@@ -26,7 +25,7 @@ const initialState: FormState = {
 };
 
 export function NewsletterForm() {
-  const [state, formAction] = useFormState(subscribeToAction, initialState);
+  const [state, formAction] = useActionState(subscribeToAction, initialState);
   const { toast } = useToast();
 
   const form = useForm<FormData>({
