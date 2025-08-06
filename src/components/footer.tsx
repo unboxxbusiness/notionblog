@@ -1,3 +1,5 @@
+
+'use client';
 import { Icons } from "@/components/ui/icons"
 import { Button } from "@/components/ui/button"
 import { Facebook, Instagram, Linkedin, Twitter, Feather } from "lucide-react"
@@ -6,6 +8,7 @@ import type { Post } from "@/lib/posts"
 import { NewsletterForm } from "./newsletter-form"
 
 export function Footer({ pages = [] }: { pages?: Post[] }) {
+
   return (
     <footer className="bg-background py-12 border-t">
       <div className="container mx-auto px-4 md:px-6">

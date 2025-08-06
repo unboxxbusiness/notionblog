@@ -1,14 +1,14 @@
 
 'use client';
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import type { Post } from '@/lib/posts';
-import { ThemeToggle } from './theme-toggle';
-import { cn } from '@/lib/utils';
-import { useTheme } from 'next-themes';
-import { Tag, FileText, Search } from 'lucide-react';
-import { NavbarSearchInput } from './navbar-search-input';
+import React, 'useState'
+import { motion } from 'framer-motion'
+import Link from 'next/link'
+import type { Post } from '@/lib/posts'
+import { ThemeToggle } from './theme-toggle'
+import { cn } from '@/lib/utils'
+import { useTheme } from 'next-themes'
+import { Tag, FileText, Search } from 'lucide-react'
+import { NavbarSearchInput } from './navbar-search-input'
 
 const transition = {
   type: 'spring',
@@ -17,7 +17,7 @@ const transition = {
   stiffness: 100,
   restDelta: 0.001,
   restSpeed: 0.001,
-};
+}
 
 const MenuItem = ({
   setActive,
@@ -25,10 +25,10 @@ const MenuItem = ({
   item,
   children,
 }: {
-  setActive: (item: string) => void;
-  active: string | null;
-  item: string;
-  children?: React.ReactNode;
+  setActive: (item: string) => void
+  active: string | null
+  item: string
+  children?: React.ReactNode
 }) => {
   return (
     <div onMouseEnter={() => setActive(item)} className="relative">
@@ -64,72 +64,91 @@ const MenuItem = ({
         </motion.div>
       )}
     </div>
-  );
-};
+  )
+}
 
 const Menu = ({
   setActive,
   children,
 }: {
-  setActive: (item: string | null) => void;
-  children: React.ReactNode;
+  setActive: (item: string | null) => void
+  children: React.ReactNode
 }) => {
-    const { resolvedTheme } = useTheme();
-
   return (
     <nav
       onMouseLeave={() => setActive(null)} // resets the state
       className={cn(
-        "relative rounded-full border bg-background/50 shadow-input flex items-center justify-center space-x-8 px-8 py-3",
-        "backdrop-blur-md"
+        'relative rounded-full border bg-background/50 shadow-input flex items-center justify-center space-x-8 px-8 py-3',
+        'backdrop-blur-md'
       )}
     >
       {children}
     </nav>
-  );
-};
+  )
+}
 
 const HoveredLink = ({ children, icon, ...rest }: any) => {
-    const Icon = icon;
-    return (
-      <Link
-        {...rest}
-        className="text-muted-foreground hover:text-foreground flex items-center gap-2"
-      >
-        <Icon size={16} />
-        {children}
-      </Link>
-    );
-  };
+  const Icon = icon
+  return (
+    <Link
+      {...rest}
+      className="text-muted-foreground hover:text-foreground flex items-center gap-2"
+    >
+      <Icon size={16} />
+      {children}
+    </Link>
+  )
+}
 
-export function Navbar({ tags = [], pages = [] }: { tags?: string[], pages?: Post[] }) {
-  const [active, setActive] = useState<string | null>(null);
+export function Navbar({
+  tags = [],
+  pages = [],
+}: {
+  tags?: string[]
+  pages?: Post[]
+}) {
+  const [active, setActive] = useState<string | null>(null)
 
   return (
     <div className="w-full z-40 fixed top-0 left-0 flex justify-center py-6">
-        <Menu setActive={setActive}>
-            <Link href="/" className="cursor-pointer text-foreground hover:opacity-[0.9] flex items-center font-bold font-headline text-lg">
-                Muse
-            </Link>
-            <MenuItem setActive={setActive} active={active} item="Tags">
-            <div className="flex flex-col space-y-4 text-sm">
-                {tags.map((tag) => (
-                    <HoveredLink key={tag} href={`/?tag=${encodeURIComponent(tag)}`} icon={Tag}>{tag}</HoveredLink>
-                ))}
-            </div>
-            </MenuItem>
-            <MenuItem setActive={setActive} active={active} item="Pages">
-            <div className="flex flex-col space-y-4 text-sm">
-                {pages.map((page) => (
-                    <HoveredLink key={page.id} href={`/${page.slug}`} icon={FileText}>{page.title}</HoveredLink>
-                ))}
-            </div>
-            </MenuItem>
-            <MenuItem setActive={setActive} active={active} item="Search">
-                <NavbarSearchInput />
-            </MenuItem>
-            <ThemeToggle />
-        </Menu>
+      <Menu setActive={setActive}>
+        <Link
+          href="/"
+          className="cursor-pointer text-foreground hover:opacity-[0.9] flex items-center font-bold font-headline text-lg"
+        >
+          Muse
+        </Link>
+        <MenuItem setActive={setActive} active={active} item="Tags">
+          <div className="flex flex-col space-y-4 text-sm">
+            {tags.map(tag => (
+              <HoveredLink
+                key={tag}
+                href={`/?tag=${encodeURIComponent(tag)}`}
+                icon={Tag}
+              >
+                {tag}
+              </HoveredLink>
+            ))}
+          </div>
+        </MenuItem>
+        <MenuItem setActive={setActive} active={active} item="Pages">
+          <div className="flex flex-col space-y-4 text-sm">
+            {pages.map(page => (
+              <HoveredLink
+                key={page.id}
+                href={`/${page.slug}`}
+                icon={FileText}
+              >
+                {page.title}
+              </HoveredLink>
+            ))}
+          </div>
+        </MenuItem>
+        <MenuItem setActive={setActive} active={active} item="Search">
+          <NavbarSearchInput />
+        </MenuItem>
+        <ThemeToggle />
+      </Menu>
     </div>
-  );
+  )
 }
