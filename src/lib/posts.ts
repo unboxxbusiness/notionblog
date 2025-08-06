@@ -94,7 +94,7 @@ export async function getPublishedPosts({
     tag, 
     query,
     page = 1,
-    pageSize = 15,
+    pageSize = 6,
 }: { 
     tag?: string;
     query?: string;
@@ -149,7 +149,7 @@ export async function getPublishedPosts({
       100 // Fetch up to 100 posts that match the filter
     );
 
-    const allPosts = allPostsResult.posts;
+    const allPosts = allPostsResult.posts.filter(p => p.type === 'post');
     const totalPosts = allPosts.length;
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;

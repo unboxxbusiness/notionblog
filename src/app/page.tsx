@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { format } from 'date-fns';
 import { ArrowRight } from 'lucide-react';
 import { Pagination } from '@/components/pagination';
+import { NavbarSearchInput } from '@/components/navbar-search-input';
 
 const POSTS_PER_PAGE = 6;
 
