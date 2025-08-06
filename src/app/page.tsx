@@ -112,6 +112,7 @@ function PostsSkeleton() {
     )
 }
 
+// Main Home component
 export default async function Home({
   searchParams,
 }: {

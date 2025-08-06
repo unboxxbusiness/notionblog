@@ -19,7 +19,7 @@ export async function generateStaticParams() {
 }
 
 export default async function StaticPage({ params }: PageProps) {
-    const page = await getPostBySlug(params.slug);
+    const { post: page } = await getPostBySlug(params.slug);
 
     if (!page || !page.recordMap) {
         notFound();
@@ -43,5 +43,5 @@ export default async function StaticPage({ params }: PageProps) {
             </header>
             <PostRenderer recordMap={page.recordMap} />
         </article>
-    )
+    );
 }
