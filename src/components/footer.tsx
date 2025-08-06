@@ -42,6 +42,12 @@ export function Footer({ pages }: { pages: Post[] }) {
               <span className="sr-only">LinkedIn</span>
             </Button>
           </div>
+          <div className="text-center mb-6">
+            <h3 className="font-headline text-2xl font-bold">Join the Muse Community</h3>
+            <p className="text-muted-foreground mt-2 max-w-md mx-auto">
+                Subscribe to our newsletter for the latest articles, insights, and a dose of creative inspiration delivered to your inbox.
+            </p>
+          </div>
           <div className="mb-8 w-full max-w-md">
             <form className="flex space-x-2">
               <div className="flex-grow">
