@@ -151,7 +151,7 @@ export const getPublishedPosts = cache(async ({
      console.error("Could not fetch published posts.", e)
      return { posts: [], totalPosts: 0, currentPage: page };
   }
-}, [], { revalidate: 3600 });
+}, ['published_posts'], { revalidate: 3600 });
 
 export const getLatestPost = cache(async (): Promise<Post | null> => {
     try {
@@ -172,7 +172,7 @@ export const getLatestPost = cache(async (): Promise<Post | null> => {
         console.error("Could not fetch latest post.", e);
         return null;
     }
-}, [], { revalidate: 3600 });
+}, ['latest_post'], { revalidate: 3600 });
 
 
 export const getPublishedPages = cache(async (): Promise<Post[]> => {
@@ -190,7 +190,7 @@ export const getPublishedPages = cache(async (): Promise<Post[]> => {
     console.error("Could not fetch published pages.", e);
     return [];
   }
-}, [], { revalidate: 3600 });
+}, ['published_pages'], { revalidate: 3600 });
 
 export const getPostBySlug = cache(async (slug: string): Promise<{ post: Post | null, relatedPosts: Post[] }> => {
   const notionPostsClient = new Client({ auth: process.env.NOTION_POSTS_API_KEY });
@@ -254,7 +254,7 @@ export const getPostBySlug = cache(async (slug: string): Promise<{ post: Post | 
   const postWithContent = { ...post, recordMap };
 
   return { post: postWithContent, relatedPosts };
-}, [], { revalidate: 3600 });
+}, ['post_by_slug'], { revalidate: 3600 });
 
 export const getAllTags = cache(async (): Promise<string[]> => {
     try {
@@ -279,4 +279,4 @@ export const getAllTags = cache(async (): Promise<string[]> => {
         console.error("Could not fetch tags.", e);
         return [];
     }
-}, [], { revalidate: 3600 });
+}, ['all_tags'], { revalidate: 3600 });
