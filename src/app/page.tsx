@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import { getPublishedPosts, getAllTags, getLatestPost } from '@/lib/posts';
 import { PostCard } from '@/components/post-card';
@@ -9,6 +10,8 @@ import Image from 'next/image';
 import { format } from 'date-fns';
 import { ArrowRight } from 'lucide-react';
 import { Pagination } from '@/components/pagination';
+import { HomeSidebar } from '@/components/home-sidebar';
+
 
 const POSTS_PER_PAGE = 6;
 
@@ -24,7 +27,7 @@ async function LatestPostHero() {
   return (
     <section className="mb-12">
         <Link href={`/posts/${latestPost.slug}`}>
-            <div className="grid md:grid-cols-2 gap-8 items-center bg-muted/50 rounded-lg overflow-hidden p-8 transition-transform hover:scale-[1.02]">
+            <div className="grid md:grid-cols-2 gap-8 items-center bg-card/50 rounded-lg overflow-hidden p-8 transition-shadow hover:shadow-lg">
                 <div className="relative aspect-[16/9] w-full overflow-hidden rounded-md">
                     <Image
                         src={latestPost.featuredImage}
@@ -79,7 +82,7 @@ async function PostsGridContent({ tag, query, page }: { tag?: string, query?: st
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {posts.map((post) => (
           <PostCard key={post.id} post={post} />
         ))}
@@ -125,14 +128,18 @@ export default async function Home({
         <LatestPostHero />
       </Suspense>
 
-      <section className="my-12">
-        <Suspense fallback={null}>
-            <TagFilters tags={allTags} />
-        </Suspense>
+      <div className="grid lg:grid-cols-3 gap-12">
+        <section className="lg:col-span-2">
+            <Suspense fallback={null}>
+                <TagFilters tags={allTags} />
+            </Suspense>
+            <PostsGrid tag={currentTag} query={currentQuery} page={currentPage} />
+        </section>
 
-        <PostsGrid tag={currentTag} query={currentQuery} page={currentPage} />
-        
-      </section>
+        <aside className="lg:col-span-1">
+            <HomeSidebar />
+        </aside>
+      </div>
     </div>
   );
 }

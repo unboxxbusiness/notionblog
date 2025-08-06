@@ -63,16 +63,16 @@ export function NewsletterForm() {
     <Form {...form}>
       <form
         action={formAction}
-        className="flex flex-col sm:flex-row items-start sm:items-center gap-2"
+        className="flex flex-col space-y-4"
       >
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
-            <FormItem className="w-full sm:flex-grow">
+            <FormItem>
               <FormLabel className="sr-only">Name</FormLabel>
               <FormControl>
-                <Input placeholder="Your name" {...field} className="rounded-full" />
+                <Input placeholder="Your name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -82,16 +82,16 @@ export function NewsletterForm() {
           control={form.control}
           name="email"
           render={({ field }) => (
-            <FormItem className="w-full sm:flex-grow">
+            <FormItem>
               <FormLabel className="sr-only">Email</FormLabel>
               <FormControl>
-                <Input placeholder="Enter your email" type="email" {...field} className="rounded-full" />
+                <Input placeholder="Enter your email" type="email" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" className="rounded-full w-full sm:w-auto flex-shrink-0" disabled={isPending}>
+        <Button type="submit" className="w-full" disabled={isPending}>
           {isPending ? <Loader2 className="animate-spin" /> : 'Subscribe'}
         </Button>
       </form>
