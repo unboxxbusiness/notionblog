@@ -7,7 +7,8 @@ import type { Post } from '@/lib/posts';
 import { ThemeToggle } from './theme-toggle';
 import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
-import { Tag, FileText } from 'lucide-react';
+import { Tag, FileText, Search } from 'lucide-react';
+import { NavbarSearchInput } from './navbar-search-input';
 
 const transition = {
   type: 'spring',
@@ -33,8 +34,9 @@ const MenuItem = ({
     <div onMouseEnter={() => setActive(item)} className="relative">
       <motion.p
         transition={{ duration: 0.3 }}
-        className="cursor-pointer text-foreground hover:opacity-[0.9]"
+        className="cursor-pointer text-foreground hover:opacity-[0.9] flex items-center gap-2"
       >
+        {item === 'Search' && <Search size={16} />}
         {item}
       </motion.p>
       {active !== null && (
@@ -122,6 +124,9 @@ export function Navbar({ tags, pages }: { tags: string[], pages: Post[] }) {
                     <HoveredLink key={page.id} href={`/${page.slug}`} icon={FileText}>{page.title}</HoveredLink>
                 ))}
             </div>
+            </MenuItem>
+            <MenuItem setActive={setActive} active={active} item="Search">
+                <NavbarSearchInput />
             </MenuItem>
             <ThemeToggle />
         </Menu>

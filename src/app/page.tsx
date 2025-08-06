@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { TagFilters } from '@/components/tag-filters';
 import { Suspense } from 'react';
 import { HomeHero } from '@/components/home-hero';
-import { SearchInput } from '@/components/search-input';
 
 function PostsGrid({ tag, query }: { tag?: string; query?: string }) {
   return (
@@ -73,9 +72,6 @@ export default async function Home({
       </Suspense>
 
       <section className="my-12">
-        <div className="mb-8 max-w-md mx-auto">
-            <SearchInput />
-        </div>
         <Suspense fallback={null}>
             <TagFilters tags={allTags} />
         </Suspense>

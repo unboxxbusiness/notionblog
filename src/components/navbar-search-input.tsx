@@ -5,12 +5,13 @@ import { Input } from './ui/input';
 import { useDebouncedCallback } from 'use-debounce';
 import { Search } from 'lucide-react';
 
-export function SearchInput() {
+export function NavbarSearchInput() {
   const searchParams = useSearchParams();
   const { replace } = useRouter();
 
   const handleSearch = useDebouncedCallback((term: string) => {
     const params = new URLSearchParams(searchParams);
+    params.set('page', '1');
     if (term) {
       params.set('q', term);
     } else {
@@ -25,7 +26,7 @@ export function SearchInput() {
       <Input
         type="search"
         placeholder="Search for articles..."
-        className="w-full pl-10"
+        className="w-full pl-10 bg-muted"
         onChange={(e) => handleSearch(e.target.value)}
         defaultValue={searchParams.get('q')?.toString()}
       />
