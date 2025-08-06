@@ -41,7 +41,10 @@ export function SocialShare({ title, slug }: { title:string, slug:string }) {
         <div className="card">
             <div className="background" />
             <div className="logo" title="Share">
-              <Share2 />
+              Share
+            </div>
+            <div className="icon-container">
+                <Share2 />
             </div>
 
             {socialLinks.map((link, index) => (
