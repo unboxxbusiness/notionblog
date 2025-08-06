@@ -30,7 +30,7 @@ async function getTextFromRecordMap(recordMap: any) {
 
 export async function generateSummaryAction(slug: string) {
   try {
-    const post = await getPostBySlug(slug);
+    const { post } = await getPostBySlug(slug);
     if (!post || !post.recordMap) {
         return { success: false, error: 'Post not found.' };
     }
