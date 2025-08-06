@@ -4,6 +4,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { getAllTags, getPublishedPages } from '@/lib/posts';
 import { Navbar } from '@/components/navbar';
+import { Footer } from '@/components/footer';
 
 export const metadata: Metadata = {
   title: 'Muse',
@@ -31,6 +32,7 @@ export default async function RootLayout({
           <div className="flex flex-col min-h-screen">
             <Navbar tags={allTags} pages={allPages} />
             <main className="flex-grow pt-28">{children}</main>
+            <Footer pages={allPages} />
           </div>
           <Toaster />
         </ThemeProvider>
