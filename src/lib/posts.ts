@@ -16,6 +16,7 @@ export type Post = {
   content: string; // This will now be the page ID to fetch from notion-client
   recordMap?: RecordMap;
   excerpt: string;
+  type: 'post' | 'page';
 };
 
 const notionClient = new Client({ auth: process.env.NOTION_TOKEN });
@@ -44,24 +45,74 @@ function pageToPost(page: PageObjectResponse): Post {
         featuredImageHint: 'notion content',
         excerpt: (page.properties.Excerpt as any)?.rich_text?.[0]?.plain_text || '',
         content: page.id, // We'll fetch content using this ID
+        type: (page.properties.Type as any)?.select?.name === 'page' ? 'page' : 'post',
     };
 }
 
+async function queryDatabase(filter?: any, sorts?: any) {
+    try {
+        const response: QueryDatabaseResponse = await notionClient.databases.query({
+            database_id: databaseId,
+            filter,
+            sorts,
+        });
+        return response.results
+            .filter((page): page is PageObjectResponse => 'properties' in page)
+            .map(pageToPost);
+    } catch (error: any) {
+        // If the sort property doesn't exist, Notion throws an error.
+        // We can catch it and try again without sorting.
+        if (error.code === 'validation_error' && error.message.includes('sort property')) {
+             const response: QueryDatabaseResponse = await notionClient.databases.query({
+                database_id: databaseId,
+                filter,
+            });
+            return response.results
+                .filter((page): page is PageObjectResponse => 'properties' in page)
+                .map(pageToPost);
+        }
+        // If it's a different error, we still want to know about it.
+        console.error("Error querying Notion database:", error);
+        return [];
+    }
+}
+
+
 export async function getPublishedPosts(): Promise<Post[]> {
-  const response: QueryDatabaseResponse = await notionClient.databases.query({
-    database_id: databaseId,
-    sorts: [
+  const posts = await queryDatabase(
+    {
+      property: 'Type',
+      select: {
+        equals: 'post',
+      },
+    },
+    [
       {
-        timestamp: 'created_time',
+        property: 'PublishedDate',
         direction: 'descending',
       },
-    ],
-  });
-
-  return response.results
-    .filter((page): page is PageObjectResponse => 'properties' in page)
-    .map(pageToPost);
+    ]
+  );
+  // Fallback to fetching all entries if Type property doesn't exist
+  if (posts.length === 0) {
+    return queryDatabase(undefined, [
+        {
+          property: 'PublishedDate',
+          direction: 'descending',
+        },
+      ]);
+  }
+  return posts;
 }
+
+export async function getPublishedPages(): Promise<Post[]> {
+    return queryDatabase({
+        property: 'Type',
+        select: {
+            equals: 'page',
+        }
+    });
+  }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   const response = await notionClient.databases.query({

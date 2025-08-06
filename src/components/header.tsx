@@ -16,7 +16,7 @@ import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
 import type { Post } from "@/lib/posts";
 
-export function Header({ tags, recentPosts }: { tags: string[], recentPosts: Post[] }) {
+export function Header({ tags, pages }: { tags: string[], pages: Post[] }) {
     const navigationItems = [
         {
             title: "Tags",
@@ -24,9 +24,9 @@ export function Header({ tags, recentPosts }: { tags: string[], recentPosts: Pos
             items: tags.map(tag => ({ title: tag, href: `/?tag=${encodeURIComponent(tag)}` })),
         },
         {
-            title: "Recent Posts",
-            description: "Read the latest articles.",
-            items: recentPosts.map(post => ({ title: post.title, href: `/posts/${post.slug}` })),
+            title: "Pages",
+            description: "Find other pages.",
+            items: pages.map(page => ({ title: page.title, href: `/${page.slug}` })),
         }
     ];
 
@@ -38,7 +38,7 @@ export function Header({ tags, recentPosts }: { tags: string[], recentPosts: Pos
                     <NavigationMenu className="flex justify-start items-start">
                         <NavigationMenuList className="flex justify-start gap-4 flex-row">
                             <NavigationMenuItem>
-                                <Link href="/" passHref>
+                                <Link href="/" passHref legacyBehavior>
                                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                                         Home
                                     </NavigationMenuLink>
