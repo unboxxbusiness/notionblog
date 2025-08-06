@@ -115,16 +115,13 @@ export async function getPublishedPosts({
     });
   }
 
-  // Notion API doesn't have offset-based pagination. We fetch all and slice.
-  // This is not ideal for very large datasets, but works for most blogs.
-  // For true pagination, we'd need cursor-based navigation on the frontend.
   try {
     const response = await queryDatabase(
         notionPostsClient,
         postsDatabaseId,
         { and: filters },
         [{ property: 'PublishedDate', direction: 'descending' }],
-        100 // Fetch up to 100 posts that match the filter
+        100
     );
 
     const allPosts = response.results
@@ -132,9 +129,7 @@ export async function getPublishedPosts({
         .map(pageToPost);
 
     const totalPosts = allPosts.length;
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginatedPosts = allPosts.slice(startIndex, endIndex);
+    const paginatedPosts = allPosts.slice((page - 1) * pageSize, page * pageSize);
 
     return { posts: paginatedPosts, totalPosts, currentPage: page };
   } catch (e) {
