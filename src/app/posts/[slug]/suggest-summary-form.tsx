@@ -7,20 +7,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Sparkles } from 'lucide-react';
 import { generateSummaryAction } from './actions';
 import { useToast } from '@/hooks/use-toast';
+import { useParams } from 'next/navigation';
 
-type SuggestSummaryFormProps = {
-  content: string;
-};
-
-export function SuggestSummaryForm({ content }: SuggestSummaryFormProps) {
+export function SuggestSummaryForm({ content }: { content: string }) {
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState('');
   const { toast } = useToast();
+  const params = useParams();
 
   const handleSubmit = async () => {
     setLoading(true);
     setSummary('');
-    const result = await generateSummaryAction(content);
+    const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug;
+    const result = await generateSummaryAction(slug);
     setLoading(false);
 
     if (result.success && result.summary) {

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Post } from '@/lib/posts';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 
@@ -28,6 +28,9 @@ export function PostCard({ post }: PostCardProps) {
           <CardTitle className="font-headline text-xl leading-snug mb-2 group-hover:text-primary transition-colors">
             {post.title}
           </CardTitle>
+          <CardDescription className="text-muted-foreground line-clamp-3">
+            {post.excerpt}
+          </CardDescription>
           <div className="flex flex-wrap gap-2 mt-4">
             {post.tags.map((tag) => (
               <Badge key={tag} variant="secondary" className="font-normal">{tag}</Badge>

@@ -6,6 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { SuggestSummaryForm } from './suggest-summary-form';
 import { ArrowLeft } from 'lucide-react';
+import { NotionRenderer } from 'react-notion-x';
+import 'react-notion-x/src/styles.css';
+import 'prismjs/themes/prism-tomorrow.css';
 
 type PostPageProps = {
   params: {
@@ -16,7 +19,7 @@ type PostPageProps = {
 export default async function PostPage({ params }: PostPageProps) {
   const post = await getPostBySlug(params.slug);
 
-  if (!post) {
+  if (!post || !post.recordMap) {
     notFound();
   }
 
@@ -44,45 +47,31 @@ export default async function PostPage({ params }: PostPageProps) {
           </div>
       </header>
       
-      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg mb-8">
-          <Image
-              src={post.featuredImage}
-              alt={post.title}
-              fill
-              className="object-cover"
-              priority
-              data-ai-hint={post.featuredImageHint}
-          />
-      </div>
-
-      <div
+      {post.featuredImage && (
+        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg mb-8">
+            <Image
+                src={post.featuredImage}
+                alt={post.title}
+                fill
+                className="object-cover"
+                priority
+                data-ai-hint={post.featuredImageHint}
+            />
+        </div>
+      )}
+      
+      <NotionRenderer 
+        recordMap={post.recordMap} 
+        fullPage={false} 
+        darkMode={false} // You can connect this to your theme
         className="prose dark:prose-invert max-w-none 
                    prose-headings:font-headline prose-headings:text-foreground prose-p:text-foreground/80
                    prose-a:text-primary hover:prose-a:text-primary/80 prose-strong:text-foreground
                    prose-blockquote:border-primary prose-blockquote:text-foreground/70"
-      >
-        {post.content.split('\n\n').map((paragraph, index) => {
-            if (paragraph.startsWith('### ')) {
-                return <h3 key={index} className="font-headline text-2xl mt-8 mb-4">{paragraph.replace('### ', '')}</h3>
-            }
-             if (paragraph.startsWith('*   ')) {
-                const listItems = paragraph.split('\n').map(item => item.replace('*   ', ''));
-                return <ul key={index} className="list-disc pl-6 space-y-2 my-4">
-                    {listItems.map((item, i) => <li key={i}>{item}</li>)}
-                </ul>
-            }
-            if(paragraph.startsWith('1.  ')){
-                 const listItems = paragraph.split('\n').map(item => item.replace(/\d+\.\s\s/, ''));
-                return <ol key={index} className="list-decimal pl-6 space-y-2 my-4">
-                    {listItems.map((item, i) => <li key={i}>{item}</li>)}
-                </ol>
-            }
-            return <p key={index}>{paragraph}</p>
-        })}
-      </div>
+      />
 
       <div className="mt-16 border-t pt-8">
-          <SuggestSummaryForm content={post.content} />
+          <SuggestSummaryForm content={post.excerpt} />
       </div>
     </article>
   );

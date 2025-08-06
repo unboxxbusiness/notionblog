@@ -1,5 +1,8 @@
-// This file mocks a Notion API client.
-import 'server-only'
+import 'server-only';
+import { Client } from '@notionhq/client';
+import { NotionAPI } from 'notion-client';
+import type { PageObjectResponse, QueryDatabaseResponse } from '@notionhq/client/build/src/api-endpoints';
+import type { RecordMap } from 'notion-types';
 
 export type Post = {
   id: string;
@@ -10,107 +13,83 @@ export type Post = {
   publishedDate: string;
   featuredImage: string;
   featuredImageHint: string;
-  content: string;
+  content: string; // This will now be the page ID to fetch from notion-client
+  recordMap?: RecordMap;
+  excerpt: string;
 };
 
-const allPosts: Post[] = [
-  {
-    id: '1',
-    slug: 'the-art-of-minimalist-design',
-    title: 'The Art of Minimalist Design',
-    tags: ['Design', 'Creativity'],
-    author: 'Elena Reyes',
-    publishedDate: '2024-05-15',
-    featuredImage: 'https://placehold.co/1200x630.png',
-    featuredImageHint: 'minimalist desk',
-    content: `
-Minimalism in design is the art of saying more with less. It's not about stripping away everything, but about making conscious decisions to include only the essential elements. This philosophy can be applied to web design, interior design, and even our daily lives.
+const notionClient = new Client({ auth: process.env.NOTION_TOKEN });
+const notionAPI = new NotionAPI();
 
-### Key Principles
+const databaseId = process.env.NOTION_DATABASE_ID!;
 
-1.  **Whitespace is Your Friend:** Ample whitespace (or negative space) helps to guide the user's eye and create a sense of calm and focus. It prevents the design from feeling cluttered.
-2.  **Limited Color Palette:** A simple color scheme, often monochromatic with one or two accent colors, creates a cohesive and elegant look. Our own site uses a deep purple primary with a teal accent.
-3.  **Flat Textures & Patterns:** Minimalist design avoids heavy textures, gradients, and shadows in favor of flat colors and simple typography.
-4.  **Purposeful Typography:** Fonts are chosen for their clarity and readability. A good hierarchy of headings and body text is crucial. We use 'Space Grotesk' for headlines to add a touch of personality.
+function pageToPost(page: PageObjectResponse): Post {
+    let cover = '';
+    if (page.cover?.type === 'file') {
+        cover = page.cover.file.url;
+    } else if (page.cover?.type === 'external') {
+        cover = page.cover.external.url;
+    }
 
-By embracing these principles, you can create designs that are not only beautiful but also highly functional and user-friendly. The goal is to remove distractions and let the content shine.
-    `,
-  },
-  {
-    id: '2',
-    slug: 'unlocking-creativity-a-guide-for-developers',
-    title: 'Unlocking Creativity: A Guide for Developers',
-    tags: ['Development', 'Creativity'],
-    author: 'Alex Chen',
-    publishedDate: '2024-04-22',
-    featuredImage: 'https://placehold.co/1200x630.png',
-    featuredImageHint: 'code editor',
-    content: `
-Creativity isn't just for artists and writers; it's a crucial skill for developers too. Writing elegant code, solving complex problems, and designing intuitive systems all require a creative spark.
+    const tags = (page.properties.Tags as any)?.multi_select.map((tag: any) => tag.name) || [];
 
-### How to Foster Creativity
-
-*   **Step Away from the Keyboard:** Sometimes the best ideas come when you're not actively trying to code. Go for a walk, listen to music, or work on a different kind of project.
-*   **Learn Something New:** Dive into a new programming language, framework, or even a non-technical subject. Expanding your knowledge base gives you more tools to draw from.
-*   **Collaborate:** Brainstorm with colleagues. Different perspectives can unlock new solutions you hadn't considered.
-*   **Embrace Constraints:** Limitations can force you to think outside the box. Try a coding challenge with a strict time or memory limit.
-
-Creativity is a muscle. The more you use it, the stronger it gets. Don't be afraid to experiment, fail, and try again.
-    `,
-  },
-  {
-    id: '3',
-    slug: 'the-future-of-ai-in-content-creation',
-    title: 'The Future of AI in Content Creation',
-    tags: ['AI', 'Technology'],
-    author: 'Samantha Lee',
-    publishedDate: '2024-03-10',
-    featuredImage: 'https://placehold.co/1200x630.png',
-    featuredImageHint: 'robot writing',
-    content: `
-Artificial Intelligence is rapidly transforming the landscape of content creation. From generating blog post ideas to drafting entire articles, AI tools are becoming indispensable for creators.
-
-### The AI Advantage
-
-*   **Efficiency:** AI can automate repetitive tasks, like generating summaries or creating social media posts, freeing up creators to focus on high-level strategy and creativity.
-*   **Inspiration:** Stuck on a blank page? AI can provide outlines, headlines, and different angles for a story, breaking through writer's block.
-*   **Personalization:** AI can help tailor content to specific audiences, analyzing data to understand what resonates most.
-
-While some fear AI will replace human creators, a more likely future is one of collaboration. AI will be a powerful assistant, augmenting human creativity, not supplanting it. The key is to learn how to wield these new tools effectively.
-    `,
-  },
-  {
-    id: '4',
-    slug: 'mastering-the-command-line',
-    title: 'Mastering the Command Line',
-    tags: ['Development', 'Technology'],
-    author: 'Ben Carter',
-    publishedDate: '2024-02-18',
-    featuredImage: 'https://placehold.co/1200x630.png',
-    featuredImageHint: 'terminal window',
-    content: `
-In a world of graphical user interfaces, the command line remains a developer's most powerful tool. It offers speed, flexibility, and automation that GUIs can't match.
-
-### Essential Commands
-
-*   **Navigation:** \`ls\`, \`cd\`, \`pwd\` are the basics for moving around your file system.
-*   **File Manipulation:** Use \`touch\`, \`rm\`, \`cp\`, \`mv\`, and \`mkdir\` to manage files and directories.
-*   **Piping and Redirection:** Combine commands with \`|\` and redirect output with \`>\` and \`<\` to create powerful workflows.
-*   **Searching:** \`grep\` is your best friend for finding text within files.
-
-Investing time in learning the command line is one of the best things you can do for your productivity as a developer. It's a timeless skill that will serve you well throughout your career.
-`,
-  },
-];
-
-export async function getPublishedPosts(): Promise<Post[]> {
-  // In a real app, you'd fetch this from Notion
-  return allPosts.sort((a, b) => new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime());
+    return {
+        id: page.id,
+        title: (page.properties.Title as any).title[0]?.plain_text,
+        slug: (page.properties.Slug as any).rich_text[0]?.plain_text,
+        tags: tags,
+        author: (page.properties.Author as any).rich_text[0]?.plain_text || 'Anonymous',
+        publishedDate: (page.properties.PublishedDate as any).date?.start,
+        featuredImage: cover || 'https://placehold.co/1200x630.png',
+        featuredImageHint: 'notion content',
+        excerpt: (page.properties.Excerpt as any).rich_text[0]?.plain_text || '',
+        content: page.id, // We'll fetch content using this ID
+    };
 }
 
-export async function getPostBySlug(slug: string): Promise<Post | undefined> {
-  // In a real app, you'd fetch a single page from Notion
-  return allPosts.find((post) => post.slug === slug);
+export async function getPublishedPosts(): Promise<Post[]> {
+  const response: QueryDatabaseResponse = await notionClient.databases.query({
+    database_id: databaseId,
+    filter: {
+      property: 'Published',
+      checkbox: {
+        equals: true,
+      },
+    },
+    sorts: [
+      {
+        property: 'PublishedDate',
+        direction: 'descending',
+      },
+    ],
+  });
+
+  return response.results
+    .filter((page): page is PageObjectResponse => 'properties' in page)
+    .map(pageToPost);
+}
+
+export async function getPostBySlug(slug: string): Promise<Post | null> {
+  const response = await notionClient.databases.query({
+    database_id: databaseId,
+    filter: {
+      property: 'Slug',
+      rich_text: {
+        equals: slug,
+      },
+    },
+  });
+
+  const page = response.results?.[0];
+
+  if (!page || !('properties' in page)) {
+    return null;
+  }
+  
+  const post = pageToPost(page);
+  const recordMap = await notionAPI.getPage(post.id);
+
+  return { ...post, recordMap };
 }
 
 export async function getAllTags(): Promise<string[]> {
