@@ -210,8 +210,8 @@ export const getPostBySlug = cache(async (slug: string): Promise<{ post: Post | 
   const post = pageToPost(page);
   let relatedPosts: Post[] = [];
 
-  // Fetch related posts only if the current post has tags
-  if (post.tags && post.tags.length > 0) {
+  // Fetch related posts only if the current post has tags and is a blog post
+  if (post.type === 'post' && post.tags && post.tags.length > 0) {
     const relatedPostsResponse = await notionPostsClient.databases.query({
       database_id: postsDatabaseId,
       filter: {
@@ -219,6 +219,7 @@ export const getPostBySlug = cache(async (slug: string): Promise<{ post: Post | 
           { property: 'Tags', multi_select: { contains: post.tags[0] } },
           { property: 'Slug', rich_text: { does_not_equal: slug } },
           { property: 'Status', status: { equals: 'Published' } },
+          { property: 'Type', select: { equals: 'post' } }
         ],
       },
       sorts: [{ property: 'PublishedDate', direction: 'descending' }],

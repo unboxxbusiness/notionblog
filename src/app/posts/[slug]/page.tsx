@@ -1,5 +1,5 @@
 
-import { getPostBySlug, getPublishedPosts } from '@/lib/posts';
+import { getPostBySlug, getPublishedPosts, getPublishedPages } from '@/lib/posts';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -11,8 +11,6 @@ import { PostRenderer } from '@/components/post-renderer';
 import { RelatedPosts } from './related-posts';
 import { SocialShare } from '@/components/social-share';
 import type { Metadata } from 'next';
-import { publicTldPlusOne } from 'firebase-functions/v2';
-import { PublicDirectory } from 'firebase-functions/v2/app-hosting';
 
 type PostPageProps = {
   params: {
@@ -24,7 +22,7 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
   const { post } = await getPostBySlug(params.slug);
   if (!post) {
     return {
-      title: 'Post not found',
+      title: 'Page not found',
     };
   }
 
@@ -64,8 +62,11 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
 
 export async function generateStaticParams() {
     const { posts } = await getPublishedPosts();
-    return posts.map((post) => ({
-      slug: post.slug,
+    const pages = await getPublishedPages();
+    const allContent = [...posts, ...pages];
+    
+    return allContent.filter(item => item.slug).map((item) => ({
+      slug: item.slug,
     }));
 }
 
@@ -89,6 +90,8 @@ export default async function PostPage({ params }: PostPageProps) {
     image: post.featuredImage,
   };
 
+  const isBlogPost = post.type === 'post';
+
   return (
     <>
       <script
@@ -104,18 +107,22 @@ export default async function PostPage({ params }: PostPageProps) {
         </div>
 
         <header className="mb-8 text-center">
-          <div className="flex flex-wrap justify-center gap-2 mb-4">
-            {post.tags.map((tag) => (
-              <Badge key={tag} variant="secondary">{tag}</Badge>
-            ))}
-          </div>
+          {isBlogPost && post.tags.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-2 mb-4">
+                {post.tags.map((tag) => (
+                <Badge key={tag} variant="secondary">{tag}</Badge>
+                ))}
+            </div>
+          )}
           <h1 className="font-headline text-4xl font-bold leading-tight tracking-tighter md:text-5xl mb-4">
             {post.title}
           </h1>
-          <div className="text-muted-foreground text-sm">
-            <span>By {post.author}</span> &bull;{' '}
-            <span>{format(new Date(post.publishedDate), 'MMMM d, yyyy')}</span>
-          </div>
+          {isBlogPost && (
+            <div className="text-muted-foreground text-sm">
+                <span>By {post.author}</span> &bull;{' '}
+                <span>{format(new Date(post.publishedDate), 'MMMM d, yyyy')}</span>
+            </div>
+          )}
         </header>
         
         {post.featuredImage && (
@@ -135,11 +142,13 @@ export default async function PostPage({ params }: PostPageProps) {
           <PostRenderer recordMap={post.recordMap} />
         </div>
 
-        <div className="mt-8 pt-8 max-w-2xl mx-auto">
-            <SuggestSummaryForm />
-        </div>
+        {isBlogPost && (
+            <div className="mt-8 pt-8 max-w-2xl mx-auto">
+                <SuggestSummaryForm />
+            </div>
+        )}
         
-        {relatedPosts.length > 0 && (
+        {isBlogPost && relatedPosts.length > 0 && (
           <div className="mt-16 border-t pt-8">
             <RelatedPosts posts={relatedPosts} />
           </div>
