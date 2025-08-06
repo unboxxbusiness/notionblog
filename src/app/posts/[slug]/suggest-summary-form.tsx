@@ -9,7 +9,7 @@ import { generateSummaryAction } from './actions';
 import { useToast } from '@/hooks/use-toast';
 import { useParams } from 'next/navigation';
 
-export function SuggestSummaryForm({ content }: { content: string }) {
+export function SuggestSummaryForm() {
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState('');
   const { toast } = useToast();
@@ -41,7 +41,7 @@ export function SuggestSummaryForm({ content }: { content: string }) {
             AI-Powered Summary
         </CardTitle>
         <CardDescription>
-          Use AI to generate a concise summary for this article. The initial summary is based on the excerpt.
+          Use AI to generate a concise summary for this article based on its full content.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -53,7 +53,7 @@ export function SuggestSummaryForm({ content }: { content: string }) {
                 Generating...
               </>
             ) : (
-              'Suggest Summary from Full Content'
+              'Generate Summary from Full Content'
             )}
           </Button>
 

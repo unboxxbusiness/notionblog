@@ -1,3 +1,4 @@
+// HMR comment
 import { getPostBySlug, getPublishedPosts } from '@/lib/posts';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -21,7 +22,6 @@ export async function generateStaticParams() {
   }));
 }
 
-// Rerunning to fix HMR issue
 export default async function PostPage({ params }: PostPageProps) {
   const post = await getPostBySlug(params.slug);
 
@@ -39,6 +39,11 @@ export default async function PostPage({ params }: PostPageProps) {
       </div>
 
       <header className="mb-8 text-center">
+        <div className="flex flex-wrap justify-center gap-2 mb-4">
+          {post.tags.map((tag) => (
+            <Badge key={tag} variant="secondary">{tag}</Badge>
+          ))}
+        </div>
         <h1 className="font-headline text-3xl font-bold leading-tight tracking-tighter md:text-5xl mb-4">
           {post.title}
         </h1>
@@ -46,15 +51,10 @@ export default async function PostPage({ params }: PostPageProps) {
           <span>By {post.author}</span> &bull;{' '}
           <span>{format(new Date(post.publishedDate), 'MMMM d, yyyy')}</span>
         </div>
-        <div className="flex flex-wrap justify-center gap-2 mt-4">
-            {post.tags.map((tag) => (
-              <Badge key={tag} variant="secondary">{tag}</Badge>
-            ))}
-          </div>
       </header>
       
       {post.featuredImage && (
-        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg mb-8">
+        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg mb-8 shadow-lg">
             <Image
                 src={post.featuredImage}
                 alt={post.title}
@@ -66,10 +66,12 @@ export default async function PostPage({ params }: PostPageProps) {
         </div>
       )}
       
-      <PostRenderer recordMap={post.recordMap} />
+      <div className="my-12">
+        <PostRenderer recordMap={post.recordMap} />
+      </div>
 
       <div className="mt-16 border-t pt-8">
-          <SuggestSummaryForm content={post.excerpt} />
+          <SuggestSummaryForm />
       </div>
     </article>
   );
