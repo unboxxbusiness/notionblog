@@ -3,16 +3,28 @@
 import { suggestSummary } from '@/ai/flows/suggest-summary';
 import { getPostBySlug } from '@/lib/posts';
 import { NotionAPI } from 'notion-client';
+import { getTextContent } from 'notion-utils';
+import type { Block } from 'notion-types';
+
 
 async function getTextFromRecordMap(recordMap: any) {
-    const notion = new NotionAPI();
-    const page = await notion.getPage(Object.keys(recordMap.block)[0]);
-    // A bit of a hack to get all the text content.
-    // This could be improved to be more robust.
-    return Object.values(page.block)
-        .map((block: any) => block.value?.properties?.title?.flat().join(''))
-        .filter(Boolean)
-        .join('\n');
+    // This function traverses the recordMap to extract all text content
+    const blockMap = recordMap.block;
+    let fullText = '';
+  
+    if (!blockMap) {
+      return fullText;
+    }
+  
+    for (const blockId of Object.keys(blockMap)) {
+      const block: Block = blockMap[blockId]?.value;
+  
+      if (block && block.properties?.title) {
+        fullText += getTextContent(block.properties.title) + '\n';
+      }
+    }
+  
+    return fullText;
 }
 
 

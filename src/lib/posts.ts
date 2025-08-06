@@ -83,8 +83,8 @@ async function queryDatabase(filter?: any, sorts?: any, pageSize?: number, start
 
     } catch (error: any) {
         if (error.code === 'validation_error') {
-            console.warn(`Notion API validation error: ${error.message}. Retrying...`);
-             // This is a simplified retry, a more robust solution might be needed
+            console.warn(`Notion API validation error: ${error.message}. This may be due to missing properties in your Notion database. Retrying without filters/sorts...`);
+            // This is a simplified retry, a more robust solution might be needed
             if (error.message.includes('sort') || error.message.includes('filter')) {
                 return queryDatabase(undefined, undefined, pageSize, startCursor);
             }
@@ -198,10 +198,10 @@ export async function getLatestPost(): Promise<Post | null> {
 
 
 export async function getPublishedPages(): Promise<Post[]> {
-  if (!notionPostsClient || !postsDatabaseId) {
-    console.error('Notion API key or Database ID is not configured in .env file');
-    return [];
-  }
+    if (!notionPostsClient || !postsDatabaseId) {
+        console.error('Notion Posts API key or Database ID is not configured in .env file');
+        return [];
+    }
   try {
     const result = await queryDatabase({
         and: [
@@ -229,7 +229,7 @@ export async function getPublishedPages(): Promise<Post[]> {
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
     if (!notionPostsClient || !postsDatabaseId) {
-        console.error('Notion API key or Database ID is not configured in .env file');
+        console.error('Notion Posts API key or Database ID is not configured in .env file');
         return null;
     }
   const response = await notionPostsClient.databases.query({
@@ -256,7 +256,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 
 export async function getAllTags(): Promise<string[]> {
     if (!notionPostsClient || !postsDatabaseId) {
-        console.error('Notion API key or Database ID is not configured in .env file');
+        console.error('Notion Posts API key or Database ID is not configured in .env file');
         return [];
     }
     const result = await queryDatabase(

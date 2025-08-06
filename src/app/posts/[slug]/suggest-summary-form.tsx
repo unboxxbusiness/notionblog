@@ -41,7 +41,7 @@ export function SuggestSummaryForm({ content }: { content: string }) {
             AI-Powered Summary
         </CardTitle>
         <CardDescription>
-          Use AI to generate a concise summary for this article.
+          Use AI to generate a concise summary for this article. The initial summary is based on the excerpt.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -53,7 +53,7 @@ export function SuggestSummaryForm({ content }: { content: string }) {
                 Generating...
               </>
             ) : (
-              'Suggest Summary'
+              'Suggest Summary from Full Content'
             )}
           </Button>
 

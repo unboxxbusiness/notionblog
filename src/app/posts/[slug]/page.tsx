@@ -21,6 +21,7 @@ export async function generateStaticParams() {
   }));
 }
 
+// Rerunning to fix HMR issue
 export default async function PostPage({ params }: PostPageProps) {
   const post = await getPostBySlug(params.slug);
 
