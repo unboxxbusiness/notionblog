@@ -52,10 +52,16 @@ const Typewriter = ({
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isDeleting, setIsDeleting] = useState(false)
   const [currentTextIndex, setCurrentTextIndex] = useState(0)
+  const [isMounted, setIsMounted] = useState(false);
 
   const texts = Array.isArray(text) ? text : [text]
 
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
     let timeout: NodeJS.Timeout
 
     const currentText = texts[currentTextIndex]
@@ -107,8 +113,13 @@ const Typewriter = ({
     texts,
     currentTextIndex,
     loop,
-    initialDelay
+    initialDelay,
+    isMounted
   ])
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <div className={cn("inline whitespace-pre-wrap", className)}>
