@@ -1,5 +1,5 @@
 
-import { getPostBySlug } from '@/lib/posts';
+import { getPostBySlug, getPublishedPages } from '@/lib/posts';
 import { notFound } from 'next/navigation';
 import { PostRenderer } from '@/components/post-renderer';
 import { ArrowLeft } from 'lucide-react';
@@ -11,6 +11,13 @@ type PageProps = {
       slug: string;
     };
   };
+
+export async function generateStaticParams() {
+    const pages = await getPublishedPages();
+    return pages.map((page) => ({
+        slug: page.slug,
+    }));
+}
 
 // This is a workaround for a Next.js HMR error.
 export default async function StaticPage({ params }: PageProps) {

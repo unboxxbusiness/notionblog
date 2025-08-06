@@ -1,5 +1,5 @@
 
-import { getPostBySlug } from '@/lib/posts';
+import { getPostBySlug, getPublishedPosts } from '@/lib/posts';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -16,6 +16,13 @@ type PostPageProps = {
     slug: string;
   };
 };
+
+export async function generateStaticParams() {
+    const { posts } = await getPublishedPosts();
+    return posts.map((post) => ({
+      slug: post.slug,
+    }));
+}
 
 export default async function PostPage({ params }: PostPageProps) {
   const { post, relatedPosts } = await getPostBySlug(params.slug);
