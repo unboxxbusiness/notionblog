@@ -226,24 +226,28 @@ export async function getPostBySlug(slug: string): Promise<{ post: Post | null, 
   }
 
   const post = pageToPost(page);
+  let relatedPosts: Post[] = [];
 
-  // Fetch related posts
-  const relatedPostsResponse = await notionPostsClient.databases.query({
-    database_id: postsDatabaseId,
-    filter: {
-      and: [
-        { property: 'Tags', multi_select: { contains: post.tags[0] } },
-        { property: 'Slug', rich_text: { does_not_equal: slug } },
-        { property: 'Status', status: { equals: 'Published' } },
-      ],
-    },
-    sorts: [{ property: 'PublishedDate', direction: 'descending' }],
-    page_size: 2,
-  });
+  // Fetch related posts only if the current post has tags
+  if (post.tags && post.tags.length > 0) {
+    const relatedPostsResponse = await notionPostsClient.databases.query({
+      database_id: postsDatabaseId,
+      filter: {
+        and: [
+          { property: 'Tags', multi_select: { contains: post.tags[0] } },
+          { property: 'Slug', rich_text: { does_not_equal: slug } },
+          { property: 'Status', status: { equals: 'Published' } },
+        ],
+      },
+      sorts: [{ property: 'PublishedDate', direction: 'descending' }],
+      page_size: 2,
+    });
 
-  const relatedPosts = relatedPostsResponse.results
-    .filter((p): p is PageObjectResponse => 'properties' in p)
-    .map(pageToPost);
+    relatedPosts = relatedPostsResponse.results
+      .filter((p): p is PageObjectResponse => 'properties' in p)
+      .map(pageToPost);
+  }
+
 
   const recordMap = await notionAPI.getPage(post.id);
   const postWithContent = { ...post, recordMap };

@@ -23,6 +23,7 @@ export async function generateStaticParams() {
 }
 
 export default async function PostPage({ params }: PostPageProps) {
+  // Fetches the post and related posts based on the slug.
   const { post, relatedPosts } = await getPostBySlug(params.slug);
 
   if (!post || !post.recordMap) {
