@@ -5,6 +5,7 @@ import { PostRenderer } from '@/components/post-renderer';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import type { Metadata } from 'next';
 
 type PageProps = {
     params: {
@@ -12,14 +13,53 @@ type PageProps = {
     };
   };
 
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+    const { post } = await getPostBySlug(params.slug);
+    if (!post) {
+      return {
+        title: 'Page not found',
+      };
+    }
+  
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const canonicalUrl = `${siteUrl}/${post.slug}`;
+  
+    return {
+      title: `${post.title} | Muse`,
+      description: post.excerpt,
+      alternates: {
+        canonical: canonicalUrl,
+      },
+      openGraph: {
+        title: post.title,
+        description: post.excerpt,
+        url: canonicalUrl,
+        images: [
+          {
+            url: post.featuredImage,
+            width: 1200,
+            height: 630,
+            alt: post.title,
+          },
+        ],
+        type: 'website',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: post.title,
+        description: post.excerpt,
+        images: [post.featuredImage],
+      },
+    };
+}
+
 export async function generateStaticParams() {
     const pages = await getPublishedPages();
-    return pages.map((page) => ({
+    return pages.filter(page => page.slug).map((page) => ({
         slug: page.slug,
     }));
 }
 
-// This is a workaround for a Next.js HMR error.
 export default async function StaticPage({ params }: PageProps) {
     const { post } = await getPostBySlug(params.slug);
 

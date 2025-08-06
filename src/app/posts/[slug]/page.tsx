@@ -10,12 +10,55 @@ import { ArrowLeft } from 'lucide-react';
 import { PostRenderer } from '@/components/post-renderer';
 import { RelatedPosts } from './related-posts';
 import { SocialShare } from '@/components/social-share';
+import type { Metadata } from 'next';
 
 type PostPageProps = {
   params: {
     slug: string;
   };
 };
+
+export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
+  const { post } = await getPostBySlug(params.slug);
+  if (!post) {
+    return {
+      title: 'Post not found',
+    };
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const canonicalUrl = `${siteUrl}/posts/${post.slug}`;
+
+  return {
+    title: `${post.title} | Muse`,
+    description: post.excerpt,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      url: canonicalUrl,
+      images: [
+        {
+          url: post.featuredImage,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+      type: 'article',
+      publishedTime: post.publishedDate,
+      authors: [post.author],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.excerpt,
+      images: [post.featuredImage],
+    },
+  };
+}
 
 export async function generateStaticParams() {
     const { posts } = await getPublishedPosts();
@@ -31,8 +74,25 @@ export default async function PostPage({ params }: PostPageProps) {
     return notFound();
   }
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description: post.excerpt,
+    datePublished: post.publishedDate,
+    author: {
+      '@type': 'Person',
+      name: post.author,
+    },
+    image: post.featuredImage,
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <article className="container mx-auto px-4 py-8 sm:px-6 lg:px-8 max-w-4xl">
         <div className="mb-8">
           <Link href="/" className="inline-flex items-center gap-2 text-primary hover:underline">
