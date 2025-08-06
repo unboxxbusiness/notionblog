@@ -1,5 +1,4 @@
 
-'use client';
 import { getPostBySlug, getPublishedPosts } from '@/lib/posts';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -12,6 +11,8 @@ import { PostRenderer } from '@/components/post-renderer';
 import { RelatedPosts } from './related-posts';
 import { SocialShare } from '@/components/social-share';
 import type { Metadata } from 'next';
+import { publicTldPlusOne } from 'firebase-functions/v2';
+import { PublicDirectory } from 'firebase-functions/v2/app-hosting';
 
 type PostPageProps = {
   params: {
