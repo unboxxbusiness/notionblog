@@ -25,7 +25,7 @@ export type PaginatedPosts = {
     nextCursor: string | null;
 }
 
-const notionClient = new Client({ auth: process.env.NOTION_API_KEY });
+const notionClient = new Client({ auth: process.env.NOTION_POSTS_API_KEY });
 const notionAPI = new NotionAPI();
 
 const databaseId = process.env.NOTION_POSTS_DATABASE_ID!;

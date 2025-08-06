@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { Client } from '@notionhq/client';
 
-const notion = new Client({ auth: process.env.NOTION_API_KEY });
+const notion = new Client({ auth: process.env.NOTION_SUBSCRIBERS_API_KEY });
 const databaseId = process.env.NOTION_SUBSCRIBERS_DATABASE_ID!;
 
 const subscribeSchema = z.object({
@@ -25,10 +25,10 @@ export async function subscribeToAction(
   formData: FormData
 ): Promise<FormState> {
 
-  if (!databaseId) {
+  if (!process.env.NOTION_SUBSCRIBERS_API_KEY || !databaseId) {
     return {
         status: 'error',
-        message: 'Subscriber database is not configured. Please set NOTION_SUBSCRIBERS_DATABASE_ID in your environment variables.',
+        message: 'Subscriber database is not configured. Please set NOTION_SUBSCRIBERS_API_KEY and NOTION_SUBSCRIBERS_DATABASE_ID in your environment variables.',
     };
   }
 
