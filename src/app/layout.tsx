@@ -30,7 +30,7 @@ export default async function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <div className="flex flex-col min-h-screen">
             <Navbar tags={allTags} pages={allPages} />
-            <main className="flex-grow pt-20">{children}</main>
+            <main className="flex-grow pt-28">{children}</main>
           </div>
           <Toaster />
         </ThemeProvider>
