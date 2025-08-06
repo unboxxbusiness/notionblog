@@ -78,7 +78,7 @@ export function Header() {
                             {navigationItems.map((item) => (
                                 <NavigationMenuItem key={item.title}>
                                     {item.href ? (
-                                        <Link href={item.href} legacyBehavior passHref>
+                                        <Link href={item.href} passHref>
                                             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                                                 {item.title}
                                             </NavigationMenuLink>
@@ -103,7 +103,7 @@ export function Header() {
                                                     </div>
                                                     <div className="flex flex-col text-sm h-full justify-end">
                                                         {item.items?.map((subItem) => (
-                                                            <Link href={subItem.href} legacyBehavior passHref key={subItem.title}>
+                                                            <Link href={subItem.href} passHref key={subItem.title}>
                                                               <NavigationMenuLink
                                                                   className="flex flex-row justify-between items-center hover:bg-muted py-2 px-4 rounded"
                                                               >
