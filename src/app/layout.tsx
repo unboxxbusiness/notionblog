@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
 import './social-card.css';
-import { Toaster } from '@/components/ui/toaster';
 import { getAllTags, getPublishedPages } from '@/lib/posts';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
@@ -35,7 +34,6 @@ export default async function RootLayout({
             <main className="flex-grow pt-28">{children}</main>
             <Footer pages={allPages} />
           </div>
-          <Toaster />
         </ThemeProvider>
       </body>
     </html>
