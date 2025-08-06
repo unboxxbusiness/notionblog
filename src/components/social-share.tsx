@@ -1,13 +1,25 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Twitter, Facebook, Linkedin, Link as LinkIcon } from 'lucide-react';
-import { AnimatedSocialIcons, type SocialIcon } from './animated-social-icons';
-import { useToast } from '@/hooks/use-toast';
+import React, { useEffect, useState } from 'react';
+import { Twitter, Facebook, Linkedin } from 'lucide-react';
 
-export function SocialShare({ title, slug }: { title: string; slug: string }) {
+interface SocialBoxProps {
+  href: string;
+  icon: React.ReactNode;
+  className: string;
+  delay?: string;
+}
+
+const SocialBox = ({ href, icon, className, delay }: SocialBoxProps) => (
+  <a href={href} target="_blank" rel="noopener noreferrer">
+    <div className={`box ${className}`} style={{ transitionDelay: delay }}>
+      <span className="icon">{icon}</span>
+    </div>
+  </a>
+);
+
+export function SocialShare({ title, slug }: { title:string, slug:string }) {
   const [url, setUrl] = useState('');
-  const { toast } = useToast();
 
   useEffect(() => {
     // Ensure window is defined (runs only on client)
@@ -15,46 +27,33 @@ export function SocialShare({ title, slug }: { title: string; slug: string }) {
   }, [slug]);
 
   if (!url) {
-    // Don't render on the server
-    return null;
+    return null; // Don't render on the server
   }
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(url);
-    toast({
-        title: "Link Copied!",
-        description: "The post URL has been copied to your clipboard.",
-    })
-  };
-
-  const socialIcons: SocialIcon[] = [
-    {
-      Icon: Twitter,
-      href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(
-        url
-      )}&text=${encodeURIComponent(title)}`,
-    },
-    {
-      Icon: Facebook,
-      href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-        url
-      )}`,
-    },
-    {
-      Icon: Linkedin,
-      href: `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(
-        url
-      )}&title=${encodeURIComponent(title)}`,
-    },
-    {
-      Icon: LinkIcon,
-      onClick: handleCopy,
-    },
+  
+  const socialLinks = [
+    { href: `https://linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`, icon: <Linkedin />, className: "box1" },
+    { href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, icon: <Twitter />, className: "box2", delay: "0.2s" },
+    { href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, icon: <Facebook />, className: "box3", delay: "0.4s" },
   ];
 
   return (
-    <div className="fixed top-1/2 right-4 sm:right-8 transform -translate-y-1/2 z-50 bg-background/50 p-2 rounded-full border shadow-lg backdrop-blur-md">
-      <AnimatedSocialIcons icons={socialIcons} />
+    <div className="fixed bottom-8 right-8 z-50">
+        <div className="card">
+            <div className="background" />
+            <div className="logo">SHARE</div>
+
+            {socialLinks.map((link, index) => (
+            <SocialBox
+                key={index}
+                href={link.href}
+                icon={link.icon}
+                className={link.className}
+                delay={link.delay}
+            />
+            ))}
+
+            <div className="box box4" style={{ transitionDelay: "0.6s" }} />
+        </div>
     </div>
   );
-}
+};

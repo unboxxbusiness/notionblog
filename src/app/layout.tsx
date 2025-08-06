@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
+import './social-card.css';
 import { Toaster } from '@/components/ui/toaster';
 import { getAllTags, getPublishedPages } from '@/lib/posts';
 import { Navbar } from '@/components/navbar';
