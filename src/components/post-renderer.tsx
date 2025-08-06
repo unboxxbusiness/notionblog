@@ -15,6 +15,12 @@ export function PostRenderer({ recordMap }: { recordMap: RecordMap }) {
     setIsDarkMode(resolvedTheme === 'dark');
   }, [resolvedTheme]);
 
+  // To prevent hydration mismatch, we can return a placeholder or null on the server
+  // and then render the full component on the client.
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
   return (
     <NotionRenderer
       recordMap={recordMap}
