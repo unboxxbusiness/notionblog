@@ -3,8 +3,8 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { MovingBorderButton } from './ui/moving-border-button';
 import { cn } from '@/lib/utils';
+import { BorderButton } from './ui/border-button';
 
 
 export function TagFilters({ tags }: { tags: string[] }) {
@@ -13,26 +13,20 @@ export function TagFilters({ tags }: { tags: string[] }) {
 
     return (
         <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
-            <MovingBorderButton
-                as={Link}
+            <BorderButton
                 href="/"
-                containerClassName="h-auto"
-                className="px-4 py-2 text-sm"
                 active={!currentTag}
             >
                 All Posts
-            </MovingBorderButton>
+            </BorderButton>
             {tags.map((tag) => (
-                <MovingBorderButton
+                <BorderButton
                     key={tag}
-                    as={Link}
                     href={`/?tag=${encodeURIComponent(tag)}`}
-                    containerClassName="h-auto"
-                    className="px-4 py-2 text-sm"
                     active={currentTag === tag}
                 >
                 {tag}
-                </MovingBorderButton>
+                </BorderButton>
             ))}
         </div>
     )
