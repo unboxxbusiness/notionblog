@@ -1,4 +1,4 @@
-import { getPostBySlug } from '@/lib/posts';
+import { getPostBySlug, getPublishedPosts } from '@/lib/posts';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -13,6 +13,13 @@ type PostPageProps = {
     slug: string;
   };
 };
+
+export async function generateStaticParams() {
+  const posts = await getPublishedPosts();
+  return posts.map((post) => ({
+    slug: post.slug,
+  }));
+}
 
 export default async function PostPage({ params }: PostPageProps) {
   const post = await getPostBySlug(params.slug);
@@ -30,7 +37,7 @@ export default async function PostPage({ params }: PostPageProps) {
         </Link>
       </div>
 
-      <header className="mb-8">
+      <header className="mb-8 text-center">
         <h1 className="font-headline text-3xl font-bold leading-tight tracking-tighter md:text-5xl mb-4">
           {post.title}
         </h1>
@@ -38,7 +45,7 @@ export default async function PostPage({ params }: PostPageProps) {
           <span>By {post.author}</span> &bull;{' '}
           <span>{format(new Date(post.publishedDate), 'MMMM d, yyyy')}</span>
         </div>
-        <div className="flex flex-wrap gap-2 mt-4">
+        <div className="flex flex-wrap justify-center gap-2 mt-4">
             {post.tags.map((tag) => (
               <Badge key={tag} variant="secondary">{tag}</Badge>
             ))}
