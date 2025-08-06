@@ -21,7 +21,7 @@ export type Post = {
 
 export type PaginatedPosts = {
     posts: Post[];
-    total: number;
+    totalPosts: number;
     nextCursor: string | null;
 }
 
@@ -116,19 +116,22 @@ export async function getPublishedPosts({
   }
 
   try {
-    const response = await queryDatabase(
+    // First, query without pagination to get the total count.
+    const countResponse = await queryDatabase(
         notionPostsClient,
         postsDatabaseId,
         { and: filters },
-        [{ property: 'PublishedDate', direction: 'descending' }],
-        100
+        undefined,
+        100 // Notion's max page size is 100
     );
+    const totalPosts = countResponse.results.length;
 
-    const allPosts = response.results
-        .filter((p): p is PageObjectResponse => 'properties' in p)
-        .map(pageToPost);
+    // Then, query with pagination. This is not ideal, but Notion API doesn't give a total count.
+    // We are fetching all posts and slicing. For larger blogs, a cursor-based approach would be better.
+     const allPosts = countResponse.results
+     .filter((p): p is PageObjectResponse => 'properties' in p)
+     .map(pageToPost);
 
-    const totalPosts = allPosts.length;
     const paginatedPosts = allPosts.slice((page - 1) * pageSize, page * pageSize);
 
     return { posts: paginatedPosts, totalPosts, currentPage: page };

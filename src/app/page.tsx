@@ -67,7 +67,7 @@ async function PostsGridContent({ tag, query, page }: { tag?: string, query?: st
       <div className="text-center py-16">
         <h2 className="font-headline text-2xl font-semibold">No posts found</h2>
         <p className="text-muted-foreground mt-2">
-            Your search for &quot;{query || tag}&quot; did not return any results.
+            Try adjusting your search or filters.
         </p>
         <Link href="/" className="mt-4 inline-block">
             <Badge variant="default" className="px-4 py-2 text-sm">Back to All Posts</Badge>
