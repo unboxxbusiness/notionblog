@@ -1,6 +1,6 @@
 import { getPostBySlug, getPublishedPages } from '@/lib/posts';
 import { notFound } from 'next/navigation';
-import { PostRenderer } from '../posts/[slug]/post-renderer';
+import { PostRenderer } from '@/components/post-renderer';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
@@ -33,7 +33,7 @@ export default async function StaticPage({ params }: PageProps) {
                     Back to all posts
                 </Link>
             </div>
-            <header className="mb-8">
+            <header className="mb-8 text-center">
                 <h1 className="font-headline text-3xl font-bold leading-tight tracking-tighter md:text-5xl mb-4">
                 {page.title}
                 </h1>

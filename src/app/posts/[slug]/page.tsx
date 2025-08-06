@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { SuggestSummaryForm } from './suggest-summary-form';
 import { ArrowLeft } from 'lucide-react';
-import { PostRenderer } from './post-renderer';
+import { PostRenderer } from '@/components/post-renderer';
 
 type PostPageProps = {
   params: {
