@@ -34,7 +34,6 @@ export function NewsletterForm() {
       name: '',
       email: '',
     },
-    context: state.status === 'error' ? state : undefined,
   });
 
   useEffect(() => {
@@ -60,14 +59,13 @@ export function NewsletterForm() {
     }
   }, [state, toast, form]);
 
-  const isPending = form.formState.isSubmitting;
+  const { isSubmitting } = form.formState;
 
   return (
     <Form {...form}>
       <form
-        action={formAction}
+        onSubmit={form.handleSubmit(formAction)}
         className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2"
-        onSubmit={form.handleSubmit(() => form.trigger())}
       >
         <FormField
           control={form.control}
@@ -95,8 +93,8 @@ export function NewsletterForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="rounded-full" disabled={isPending}>
-          {isPending ? <Loader2 className="animate-spin" /> : 'Subscribe'}
+        <Button type="submit" className="rounded-full" disabled={isSubmitting}>
+          {isSubmitting ? <Loader2 className="animate-spin" /> : 'Subscribe'}
         </Button>
       </form>
        {state.status === 'error' && !state.errors && (
