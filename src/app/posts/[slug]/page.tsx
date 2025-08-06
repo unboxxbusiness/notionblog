@@ -23,7 +23,6 @@ export async function generateStaticParams() {
 }
 
 export default async function PostPage({ params }: PostPageProps) {
-  // Fetches the post and related posts based on the slug.
   const { post, relatedPosts } = await getPostBySlug(params.slug);
 
   if (!post || !post.recordMap) {
@@ -45,7 +44,7 @@ export default async function PostPage({ params }: PostPageProps) {
             <Badge key={tag} variant="secondary">{tag}</Badge>
           ))}
         </div>
-        <h1 className="font-headline text-3xl font-bold leading-tight tracking-tighter md:text-5xl mb-4">
+        <h1 className="font-headline text-4xl font-bold leading-tight tracking-tighter md:text-5xl mb-4">
           {post.title}
         </h1>
         <div className="text-muted-foreground text-sm">

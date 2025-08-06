@@ -25,7 +25,8 @@ export function PostRenderer({ recordMap }: { recordMap: RecordMap }) {
       fullPage={false}
       darkMode={resolvedTheme === 'dark'}
       className="prose dark:prose-invert max-w-none 
-                 prose-headings:font-headline prose-p:text-foreground/80
+                 prose-h1:font-headline prose-h2:font-headline prose-h3:font-headline 
+                 prose-p:text-foreground/80
                  prose-a:text-primary hover:prose-a:text-primary/80 prose-strong:text-foreground
                  prose-blockquote:border-primary prose-blockquote:text-foreground/70
                  mx-auto
