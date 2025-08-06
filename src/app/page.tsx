@@ -2,10 +2,9 @@ import Link from 'next/link';
 import { getPublishedPosts, getAllTags } from '@/lib/posts';
 import { PostCard } from '@/components/post-card';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import { HomeHero } from '@/components/home-hero';
 import { TagFilters } from '@/components/tag-filters';
 import { Suspense } from 'react';
+import { HomeHero } from '@/components/home-hero';
 
 function PostsGrid({ tag }: { tag?: string }) {
   return (
@@ -67,7 +66,9 @@ export default async function Home({
   
   return (
     <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <HomeHero />
+      <Suspense fallback={<div className="h-28" />}>
+        <HomeHero />
+      </Suspense>
 
       <section className="my-12">
         <Suspense fallback={null}>
