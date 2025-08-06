@@ -3,17 +3,21 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Header } from '@/components/header';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
+import { getAllTags, getPublishedPosts } from '@/lib/posts';
 
 export const metadata: Metadata = {
   title: 'Muse',
   description: 'A blog for creative minds and curious souls.',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const allTags = await getAllTags();
+  const recentPosts = (await getPublishedPosts()).slice(0, 5);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -25,7 +29,7 @@ export default function RootLayout({
       <body className="font-body antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <div className="flex flex-col min-h-screen">
-            <Header />
+            <Header tags={allTags} recentPosts={recentPosts} />
             <main className="flex-grow pt-20">{children}</main>
           </div>
           <Toaster />

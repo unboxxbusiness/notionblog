@@ -14,58 +14,20 @@ import { Menu, MoveRight, X } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
+import type { Post } from "@/lib/posts";
 
-export function Header() {
+export function Header({ tags, recentPosts }: { tags: string[], recentPosts: Post[] }) {
     const navigationItems = [
         {
-            title: "Home",
-            href: "/",
-            description: "",
+            title: "Tags",
+            description: "Explore posts by tags.",
+            items: tags.map(tag => ({ title: tag, href: `/?tag=${encodeURIComponent(tag)}` })),
         },
         {
-            title: "Product",
-            description: "Managing a small business today is already tough.",
-            items: [
-                {
-                    title: "Reports",
-                    href: "#",
-                },
-                {
-                    title: "Statistics",
-                    href: "#",
-                },
-                {
-                    title: "Dashboards",
-                    href: "#",
-                },
-                {
-                    title: "Recordings",
-                    href: "#",
-                },
-            ],
-        },
-        {
-            title: "Company",
-            description: "Managing a small business today is already tough.",
-            items: [
-                {
-                    title: "About us",
-                    href: "#",
-                },
-                {
-                    title: "Fundraising",
-                    href: "#",
-                },
-                {
-                    title: "Investors",
-                    href: "#",
-                },
-                {
-                    title: "Contact us",
-                    href: "#",
-                },
-            ],
-        },
+            title: "Recent Posts",
+            description: "Read the latest articles.",
+            items: recentPosts.map(post => ({ title: post.title, href: `/posts/${post.slug}` })),
+        }
     ];
 
     const [isOpen, setOpen] = useState(false);
@@ -75,48 +37,44 @@ export function Header() {
                 <div className="justify-start items-center gap-4 lg:flex hidden flex-row">
                     <NavigationMenu className="flex justify-start items-start">
                         <NavigationMenuList className="flex justify-start gap-4 flex-row">
+                            <NavigationMenuItem>
+                                <Link href="/" passHref>
+                                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                                        Home
+                                    </NavigationMenuLink>
+                                </Link>
+                            </NavigationMenuItem>
                             {navigationItems.map((item) => (
                                 <NavigationMenuItem key={item.title}>
-                                    {item.href ? (
-                                        <Link href={item.href} passHref>
-                                            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                                                {item.title}
-                                            </NavigationMenuLink>
-                                        </Link>
-                                    ) : (
-                                        <>
-                                            <NavigationMenuTrigger className="font-medium text-sm bg-transparent">
-                                                {item.title}
-                                            </NavigationMenuTrigger>
-                                            <NavigationMenuContent className="!w-[450px] p-4">
-                                                <div className="flex flex-col lg:grid grid-cols-2 gap-4">
-                                                    <div className="flex flex-col h-full justify-between">
-                                                        <div className="flex flex-col">
-                                                            <p className="text-base">{item.title}</p>
-                                                            <p className="text-muted-foreground text-sm">
-                                                                {item.description}
-                                                            </p>
-                                                        </div>
-                                                        <Button size="sm" className="mt-10">
-                                                            Book a call today
-                                                        </Button>
-                                                    </div>
-                                                    <div className="flex flex-col text-sm h-full justify-end">
-                                                        {item.items?.map((subItem) => (
-                                                            <Link href={subItem.href} passHref key={subItem.title}>
-                                                              <NavigationMenuLink
-                                                                  className="flex flex-row justify-between items-center hover:bg-muted py-2 px-4 rounded"
-                                                              >
-                                                                  <span>{subItem.title}</span>
-                                                                  <MoveRight className="w-4 h-4 text-muted-foreground" />
-                                                              </NavigationMenuLink>
-                                                            </Link>
-                                                        ))}
+                                    <>
+                                        <NavigationMenuTrigger className="font-medium text-sm bg-transparent">
+                                            {item.title}
+                                        </NavigationMenuTrigger>
+                                        <NavigationMenuContent className="!w-[450px] p-4">
+                                            <div className="flex flex-col lg:grid grid-cols-2 gap-4">
+                                                <div className="flex flex-col h-full justify-between">
+                                                    <div className="flex flex-col">
+                                                        <p className="text-base">{item.title}</p>
+                                                        <p className="text-muted-foreground text-sm">
+                                                            {item.description}
+                                                        </p>
                                                     </div>
                                                 </div>
-                                            </NavigationMenuContent>
-                                        </>
-                                    )}
+                                                <div className="flex flex-col text-sm h-full">
+                                                    {item.items?.map((subItem) => (
+                                                        <Link href={subItem.href} passHref key={subItem.title}>
+                                                            <NavigationMenuLink
+                                                                className="flex flex-row justify-between items-center hover:bg-muted py-2 px-4 rounded"
+                                                            >
+                                                                <span className="truncate">{subItem.title}</span>
+                                                                <MoveRight className="w-4 h-4 text-muted-foreground" />
+                                                            </NavigationMenuLink>
+                                                        </Link>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </NavigationMenuContent>
+                                    </>
                                 </NavigationMenuItem>
                             ))}
                         </NavigationMenuList>
@@ -136,21 +94,18 @@ export function Header() {
                     </Button>
                     {isOpen && (
                         <div className="absolute top-20 border-t flex flex-col w-full right-0 bg-background shadow-lg py-4 container gap-8">
+                             <Link
+                                href="/"
+                                className="flex justify-between items-center"
+                                onClick={() => setOpen(false)}
+                            >
+                                <span className="text-lg">Home</span>
+                                <MoveRight className="w-4 h-4 stroke-1 text-muted-foreground" />
+                            </Link>
                             {navigationItems.map((item) => (
                                 <div key={item.title}>
                                     <div className="flex flex-col gap-2">
-                                        {item.href ? (
-                                            <Link
-                                                href={item.href}
-                                                className="flex justify-between items-center"
-                                                onClick={() => setOpen(false)}
-                                            >
-                                                <span className="text-lg">{item.title}</span>
-                                                <MoveRight className="w-4 h-4 stroke-1 text-muted-foreground" />
-                                            </Link>
-                                        ) : (
-                                            <p className="text-lg">{item.title}</p>
-                                        )}
+                                        <p className="text-lg">{item.title}</p>
                                         {item.items &&
                                             item.items.map((subItem) => (
                                                 <Link
@@ -159,7 +114,7 @@ export function Header() {
                                                     className="flex justify-between items-center"
                                                     onClick={() => setOpen(false)}
                                                 >
-                                                    <span className="text-muted-foreground">
+                                                    <span className="text-muted-foreground truncate">
                                                         {subItem.title}
                                                     </span>
                                                     <MoveRight className="w-4 h-4 stroke-1" />
