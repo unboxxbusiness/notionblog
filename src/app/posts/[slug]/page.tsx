@@ -6,9 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { SuggestSummaryForm } from './suggest-summary-form';
 import { ArrowLeft } from 'lucide-react';
-import { NotionRenderer } from 'react-notion-x';
-import 'react-notion-x/src/styles.css';
-import 'prismjs/themes/prism-tomorrow.css';
+import { PostRenderer } from './post-renderer';
 
 type PostPageProps = {
   params: {
@@ -60,15 +58,7 @@ export default async function PostPage({ params }: PostPageProps) {
         </div>
       )}
       
-      <NotionRenderer 
-        recordMap={post.recordMap} 
-        fullPage={false} 
-        darkMode={false} // You can connect this to your theme
-        className="prose dark:prose-invert max-w-none 
-                   prose-headings:font-headline prose-headings:text-foreground prose-p:text-foreground/80
-                   prose-a:text-primary hover:prose-a:text-primary/80 prose-strong:text-foreground
-                   prose-blockquote:border-primary prose-blockquote:text-foreground/70"
-      />
+      <PostRenderer recordMap={post.recordMap} />
 
       <div className="mt-16 border-t pt-8">
           <SuggestSummaryForm content={post.excerpt} />
