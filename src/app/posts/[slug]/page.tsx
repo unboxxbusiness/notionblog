@@ -8,6 +8,7 @@ import { SuggestSummaryForm } from './suggest-summary-form';
 import { ArrowLeft } from 'lucide-react';
 import { PostRenderer } from '@/components/post-renderer';
 import { RelatedPosts } from './related-posts';
+import { SocialShare } from '@/components/social-share';
 
 type PostPageProps = {
   params: {
@@ -70,7 +71,11 @@ export default async function PostPage({ params }: PostPageProps) {
         <PostRenderer recordMap={post.recordMap} />
       </div>
 
-      <div className="mt-16 border-t pt-8 max-w-2xl mx-auto">
+      <div className="border-t">
+        <SocialShare title={post.title} slug={post.slug} />
+      </div>
+
+      <div className="mt-8 border-t pt-8 max-w-2xl mx-auto">
           <SuggestSummaryForm />
       </div>
       
