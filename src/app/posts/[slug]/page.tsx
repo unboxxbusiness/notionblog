@@ -1,5 +1,6 @@
+'use client';
 
-import { getPostBySlug, getPublishedPosts } from '@/lib/posts';
+import { getPostBySlug } from '@/lib/posts';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -10,6 +11,8 @@ import { ArrowLeft } from 'lucide-react';
 import { PostRenderer } from '@/components/post-renderer';
 import { RelatedPosts } from './related-posts';
 import { SocialShare } from '@/components/social-share';
+import { useEffect, useState } from 'react';
+import type { Post } from '@/lib/posts';
 
 type PostPageProps = {
   params: {
@@ -17,18 +20,45 @@ type PostPageProps = {
   };
 };
 
-export async function generateStaticParams() {
-  const { posts } = await getPublishedPosts({ pageSize: 100 });
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
-}
+export default function PostPage({ params }: PostPageProps) {
+  const [post, setPost] = useState<Post | null>(null);
+  const [relatedPosts, setRelatedPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default async function PostPage({ params }: PostPageProps) {
-  const { post, relatedPosts } = await getPostBySlug(params.slug);
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true);
+        const { post: fetchedPost, relatedPosts: fetchedRelatedPosts } = await getPostBySlug(params.slug);
+        if (!fetchedPost) {
+          notFound();
+        }
+        setPost(fetchedPost);
+        setRelatedPosts(fetchedRelatedPosts);
+      } catch (error) {
+        console.error('Failed to fetch post:', error);
+        // Handle error appropriately, maybe show a toast
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, [params.slug]);
 
-  if (!post || !post.recordMap) {
-    notFound();
+  if (loading || !post || !post.recordMap) {
+    return (
+        <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8 max-w-4xl">
+            <div className="space-y-4 animate-pulse">
+                <div className="h-10 w-48 bg-muted/50 rounded-md" />
+                <div className="space-y-2 text-center">
+                    <div className="h-8 w-64 bg-muted/50 rounded-md mx-auto" />
+                    <div className="h-12 w-3/4 bg-muted/50 rounded-md mx-auto" />
+                    <div className="h-6 w-48 bg-muted/50 rounded-md mx-auto" />
+                </div>
+                <div className="aspect-[16/9] w-full bg-muted/50 rounded-lg" />
+            </div>
+        </div>
+    );
   }
 
   return (

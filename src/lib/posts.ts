@@ -3,6 +3,7 @@ import { Client } from '@notionhq/client';
 import { NotionAPI } from 'notion-client';
 import type { PageObjectResponse, QueryDatabaseResponse } from '@notionhq/client/build/src/api-endpoints';
 import type { RecordMap } from 'notion-types';
+import { cache } from 'react';
 
 export type Post = {
   id: string;
@@ -98,7 +99,7 @@ async function queryDatabase(
 }
 
 
-export async function getPublishedPosts({ 
+export const getPublishedPosts = cache(async ({ 
     tag, 
     query,
     page = 1,
@@ -108,7 +109,7 @@ export async function getPublishedPosts({
     query?: string;
     page?: number;
     pageSize?: number;
-} = {}): Promise<{posts: Post[], totalPosts: number, currentPage: number}> {
+} = {}): Promise<{posts: Post[], totalPosts: number, currentPage: number}> => {
   
   const filters: any[] = [
     { property: 'Type', select: { equals: 'post' } },
@@ -150,9 +151,9 @@ export async function getPublishedPosts({
      console.error("Could not fetch published posts.", e)
      return { posts: [], totalPosts: 0, currentPage: page };
   }
-}
+});
 
-export async function getLatestPost(): Promise<Post | null> {
+export const getLatestPost = cache(async (): Promise<Post | null> => {
     try {
         const response = await queryDatabase(
             { and: [
@@ -171,10 +172,10 @@ export async function getLatestPost(): Promise<Post | null> {
         console.error("Could not fetch latest post.", e);
         return null;
     }
-}
+});
 
 
-export async function getPublishedPages(): Promise<Post[]> {
+export const getPublishedPages = cache(async (): Promise<Post[]> => {
   try {
     const response = await queryDatabase({
         and: [
@@ -189,9 +190,9 @@ export async function getPublishedPages(): Promise<Post[]> {
     console.error("Could not fetch published pages.", e);
     return [];
   }
-}
+});
 
-export async function getPostBySlug(slug: string): Promise<{ post: Post | null, relatedPosts: Post[] }> {
+export const getPostBySlug = cache(async (slug: string): Promise<{ post: Post | null, relatedPosts: Post[] }> => {
   const notionPostsClient = new Client({ auth: process.env.NOTION_POSTS_API_KEY });
   const postsDatabaseId = process.env.NOTION_POSTS_DATABASE_ID;
 
@@ -253,9 +254,9 @@ export async function getPostBySlug(slug: string): Promise<{ post: Post | null, 
   const postWithContent = { ...post, recordMap };
 
   return { post: postWithContent, relatedPosts };
-}
+});
 
-export async function getAllTags(): Promise<string[]> {
+export const getAllTags = cache(async (): Promise<string[]> => {
     try {
         const response = await queryDatabase(
             { and: [
@@ -278,4 +279,4 @@ export async function getAllTags(): Promise<string[]> {
         console.error("Could not fetch tags.", e);
         return [];
     }
-}
+});
