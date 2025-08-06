@@ -53,44 +53,26 @@ function pageToPost(page: PageObjectResponse): Post {
     };
 }
 
-async function queryDatabase(filter?: any, sorts?: any, pageSize?: number, startCursor?: string): Promise<PaginatedPosts> {
-    const notionPostsClient = process.env.NOTION_POSTS_API_KEY ? new Client({ auth: process.env.NOTION_POSTS_API_KEY }) : null;
-    const postsDatabaseId = process.env.NOTION_POSTS_DATABASE_ID;
-
-    if (!notionPostsClient || !postsDatabaseId) {
-        console.error('Notion Posts API key or Database ID is not configured in .env file');
-        return { posts: [], total: 0, nextCursor: null };
-    }
-
+async function queryDatabase(
+    client: Client,
+    databaseId: string,
+    filter?: any,
+    sorts?: any,
+    pageSize?: number,
+    startCursor?: string
+): Promise<QueryDatabaseResponse> {
     try {
-        const response: QueryDatabaseResponse = await notionPostsClient.databases.query({
-            database_id: postsDatabaseId,
+        const response = await client.databases.query({
+            database_id: databaseId,
             filter,
             sorts,
             page_size: pageSize,
             start_cursor: startCursor,
         });
-
-        const posts = response.results
-            .filter((page): page is PageObjectResponse => 'properties' in page)
-            .map(pageToPost);
-
-        return {
-            posts,
-            total: (response as any).total_matches || posts.length, // total_matches is not in the type for some reason
-            nextCursor: response.next_cursor,
-        };
-
+        return response;
     } catch (error: any) {
-        if (error.code === 'validation_error') {
-            console.warn(`Notion API validation error: ${error.message}. This may be due to missing properties in your Notion database. Retrying without filters/sorts...`);
-            // This is a simplified retry, a more robust solution might be needed
-            if (error.message.includes('sort') || error.message.includes('filter')) {
-                return queryDatabase(undefined, undefined, pageSize, startCursor);
-            }
-        }
-        console.error("Error querying Notion database:", error.message);
-        return { posts: [], total: 0, nextCursor: null };
+        console.error(`Error querying Notion database (ID: ${databaseId}):`, error.message);
+        throw new Error(`Failed to query Notion database. Check if the database ID is correct and shared with the integration.`);
     }
 }
 
@@ -107,60 +89,48 @@ export async function getPublishedPosts({
     pageSize?: number;
 } = {}): Promise<{posts: Post[], totalPosts: number, currentPage: number}> {
   
+  const notionPostsClient = process.env.NOTION_POSTS_API_KEY ? new Client({ auth: process.env.NOTION_POSTS_API_KEY }) : null;
+  const postsDatabaseId = process.env.NOTION_POSTS_DATABASE_ID;
+
+  if (!notionPostsClient || !postsDatabaseId) {
+    console.error('NOTION_POSTS_API_KEY or NOTION_POSTS_DATABASE_ID is not configured.');
+    return { posts: [], totalPosts: 0, currentPage: page };
+  }
+
   const filters: any[] = [
-    {
-      property: 'Type',
-      select: {
-        equals: 'post',
-      },
-    },
-    {
-      property: 'Status',
-      status: {
-        equals: 'Published',
-      },
-    }
+    { property: 'Type', select: { equals: 'post' } },
+    { property: 'Status', status: { equals: 'Published' } },
   ];
 
   if (tag) {
-    filters.push({
-      property: 'Tags',
-      multi_select: {
-        contains: tag,
-      },
-    });
+    filters.push({ property: 'Tags', multi_select: { contains: tag } });
   }
 
   if (query) {
     filters.push({
         or: [
-            {
-                property: 'Title',
-                rich_text: {
-                    contains: query,
-                },
-            },
-            {
-                property: 'Excerpt',
-                rich_text: {
-                    contains: query,
-                },
-            },
+            { property: 'Title', rich_text: { contains: query } },
+            { property: 'Excerpt', rich_text: { contains: query } },
         ],
-    })
+    });
   }
 
   // Notion API doesn't have offset-based pagination. We fetch all and slice.
   // This is not ideal for very large datasets, but works for most blogs.
   // For true pagination, we'd need cursor-based navigation on the frontend.
   try {
-    const allPostsResult = await queryDatabase(
-      { and: filters },
-      [{ property: 'PublishedDate', direction: 'descending' }],
-      100 // Fetch up to 100 posts that match the filter
+    const response = await queryDatabase(
+        notionPostsClient,
+        postsDatabaseId,
+        { and: filters },
+        [{ property: 'PublishedDate', direction: 'descending' }],
+        100 // Fetch up to 100 posts that match the filter
     );
 
-    const allPosts = allPostsResult.posts.filter(p => p.type === 'post');
+    const allPosts = response.results
+        .filter((p): p is PageObjectResponse => 'properties' in p)
+        .map(pageToPost);
+
     const totalPosts = allPosts.length;
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
@@ -168,21 +138,23 @@ export async function getPublishedPosts({
 
     return { posts: paginatedPosts, totalPosts, currentPage: page };
   } catch (e) {
-    console.warn("Could not fetch filtered or sorted posts, falling back to all documents.", e)
-    const allPostsResult = await queryDatabase(undefined, undefined, 100);
-    const allPosts = allPostsResult.posts.filter(p => p.type === 'post');
-    const totalPosts = allPosts.length;
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginatedPosts = allPosts.slice(startIndex, endIndex);
-
-    return { posts: paginatedPosts, totalPosts, currentPage: page };
+     console.error("Could not fetch published posts.", e)
+     return { posts: [], totalPosts: 0, currentPage: page };
   }
 }
 
 export async function getLatestPost(): Promise<Post | null> {
+    const notionPostsClient = process.env.NOTION_POSTS_API_KEY ? new Client({ auth: process.env.NOTION_POSTS_API_KEY }) : null;
+    const postsDatabaseId = process.env.NOTION_POSTS_DATABASE_ID;
+
+    if (!notionPostsClient || !postsDatabaseId) {
+        return null;
+    }
+    
     try {
-        const result = await queryDatabase(
+        const response = await queryDatabase(
+            notionPostsClient,
+            postsDatabaseId,
             { and: [
                 { property: 'Type', select: { equals: 'post' } },
                 { property: 'Status', status: { equals: 'Published' } },
@@ -190,36 +162,37 @@ export async function getLatestPost(): Promise<Post | null> {
             [{ property: 'PublishedDate', direction: 'descending' }],
             1
         );
-        return result.posts[0] || null;
+        const post = response.results[0];
+        return post && 'properties' in post ? pageToPost(post) : null;
     } catch (e) {
+        console.error("Could not fetch latest post.", e);
         return null;
     }
 }
 
 
 export async function getPublishedPages(): Promise<Post[]> {
+  const notionPostsClient = process.env.NOTION_POSTS_API_KEY ? new Client({ auth: process.env.NOTION_POSTS_API_KEY }) : null;
+  const postsDatabaseId = process.env.NOTION_POSTS_DATABASE_ID;
+
+  if (!notionPostsClient || !postsDatabaseId) {
+    console.error('NOTION_POSTS_API_KEY or NOTION_POSTS_DATABASE_ID is not configured.');
+    return [];
+  }
+  
   try {
-    const result = await queryDatabase({
+    const response = await queryDatabase(notionPostsClient, postsDatabaseId, {
         and: [
-            {
-                property: 'Type',
-                select: {
-                    equals: 'page',
-                }
-            },
-            {
-                property: 'Status',
-                status: {
-                    equals: 'Published',
-                }
-            }
+            { property: 'Type', select: { equals: 'page' } },
+            { property: 'Status', status: { equals: 'Published' } }
         ]
     });
-    return result.posts;
+    return response.results
+        .filter((p): p is PageObjectResponse => 'properties' in p)
+        .map(pageToPost);
   } catch(e) {
-    console.warn("Could not fetch pages, falling back to all documents.", e);
-    const allDocsResult = await queryDatabase();
-    return allDocsResult.posts.filter(p => p.type === 'page');
+    console.error("Could not fetch published pages.", e);
+    return [];
   }
 }
 
@@ -228,9 +201,9 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     const postsDatabaseId = process.env.NOTION_POSTS_DATABASE_ID;
 
     if (!notionPostsClient || !postsDatabaseId) {
-        console.error('Notion Posts API key or Database ID is not configured in .env file');
         return null;
     }
+
   const response = await notionPostsClient.databases.query({
     database_id: postsDatabaseId,
     filter: {
@@ -254,17 +227,36 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 }
 
 export async function getAllTags(): Promise<string[]> {
-    const result = await queryDatabase(
-        { and: [
-            { property: 'Type', select: { equals: 'post' } },
-            { property: 'Status', status: { equals: 'Published' } },
-        ]}, 
-        undefined, 
-        100 // fetch up to 100 posts to build the tag list
-    );
-    const tags = new Set<string>();
-    result.posts.forEach(post => {
-        post.tags.forEach(tag => tags.add(tag));
-    });
-    return Array.from(tags).sort();
+    const notionPostsClient = process.env.NOTION_POSTS_API_KEY ? new Client({ auth: process.env.NOTION_POSTS_API_KEY }) : null;
+    const postsDatabaseId = process.env.NOTION_POSTS_DATABASE_ID;
+
+    if (!notionPostsClient || !postsDatabaseId) {
+        console.error('NOTION_POSTS_API_KEY or NOTION_POSTS_DATABASE_ID is not configured.');
+        return [];
+    }
+
+    try {
+        const response = await queryDatabase(
+            notionPostsClient,
+            postsDatabaseId,
+            { and: [
+                { property: 'Type', select: { equals: 'post' } },
+                { property: 'Status', status: { equals: 'Published' } },
+            ]}, 
+            undefined, 
+            100 // fetch up to 100 posts to build the tag list
+        );
+        
+        const tags = new Set<string>();
+        response.results.forEach(result => {
+            if ('properties' in result) {
+                const post = pageToPost(result);
+                post.tags.forEach(tag => tags.add(tag));
+            }
+        });
+        return Array.from(tags).sort();
+    } catch (e) {
+        console.error("Could not fetch tags.", e);
+        return [];
+    }
 }
