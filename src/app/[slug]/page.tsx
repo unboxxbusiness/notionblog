@@ -15,13 +15,12 @@ type PageProps = {
 export async function generateStaticParams() {
     const pages = await getPublishedPages();
     return pages
-        .filter((page) => page.slug) // Ensure slug is not empty
+        .filter((page) => page.slug)
         .map((page) => ({
             slug: page.slug,
         }));
 }
 
-// Default export for the page component.
 export default async function StaticPage({ params }: PageProps) {
     const { post: page } = await getPostBySlug(params.slug);
 
