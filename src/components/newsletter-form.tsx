@@ -25,7 +25,7 @@ const initialState: FormState = {
 };
 
 export function NewsletterForm() {
-  const [state, formAction] = useActionState(subscribeToAction, initialState);
+  const [state, formAction, isPending] = useActionState(subscribeToAction, initialState);
   const { toast } = useToast();
 
   const form = useForm<FormData>({
@@ -59,12 +59,10 @@ export function NewsletterForm() {
     }
   }, [state, toast, form]);
 
-  const { isSubmitting } = form.formState;
-
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(formAction)}
+        action={formAction}
         className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2"
       >
         <FormField
@@ -93,8 +91,8 @@ export function NewsletterForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="rounded-full" disabled={isSubmitting}>
-          {isSubmitting ? <Loader2 className="animate-spin" /> : 'Subscribe'}
+        <Button type="submit" className="rounded-full" disabled={isPending}>
+          {isPending ? <Loader2 className="animate-spin" /> : 'Subscribe'}
         </Button>
       </form>
        {state.status === 'error' && !state.errors && (
