@@ -25,10 +25,7 @@ export type PaginatedPosts = {
     nextCursor: string | null;
 }
 
-const notionPostsClient = process.env.NOTION_POSTS_API_KEY ? new Client({ auth: process.env.NOTION_POSTS_API_KEY }) : null;
 const notionAPI = new NotionAPI();
-
-const postsDatabaseId = process.env.NOTION_POSTS_DATABASE_ID;
 
 function pageToPost(page: PageObjectResponse): Post {
     let cover = '';
@@ -57,6 +54,9 @@ function pageToPost(page: PageObjectResponse): Post {
 }
 
 async function queryDatabase(filter?: any, sorts?: any, pageSize?: number, startCursor?: string): Promise<PaginatedPosts> {
+    const notionPostsClient = process.env.NOTION_POSTS_API_KEY ? new Client({ auth: process.env.NOTION_POSTS_API_KEY }) : null;
+    const postsDatabaseId = process.env.NOTION_POSTS_DATABASE_ID;
+
     if (!notionPostsClient || !postsDatabaseId) {
         console.error('Notion Posts API key or Database ID is not configured in .env file');
         return { posts: [], total: 0, nextCursor: null };
@@ -198,10 +198,6 @@ export async function getLatestPost(): Promise<Post | null> {
 
 
 export async function getPublishedPages(): Promise<Post[]> {
-    if (!notionPostsClient || !postsDatabaseId) {
-        console.error('Notion Posts API key or Database ID is not configured in .env file');
-        return [];
-    }
   try {
     const result = await queryDatabase({
         and: [
@@ -228,6 +224,9 @@ export async function getPublishedPages(): Promise<Post[]> {
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
+    const notionPostsClient = process.env.NOTION_POSTS_API_KEY ? new Client({ auth: process.env.NOTION_POSTS_API_KEY }) : null;
+    const postsDatabaseId = process.env.NOTION_POSTS_DATABASE_ID;
+
     if (!notionPostsClient || !postsDatabaseId) {
         console.error('Notion Posts API key or Database ID is not configured in .env file');
         return null;
@@ -255,10 +254,6 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 }
 
 export async function getAllTags(): Promise<string[]> {
-    if (!notionPostsClient || !postsDatabaseId) {
-        console.error('Notion Posts API key or Database ID is not configured in .env file');
-        return [];
-    }
     const result = await queryDatabase(
         { and: [
             { property: 'Type', select: { equals: 'post' } },
