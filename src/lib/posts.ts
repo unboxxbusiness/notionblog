@@ -25,7 +25,7 @@ export type PaginatedPosts = {
     nextCursor: string | null;
 }
 
-const notionClient = new Client({ auth: process.env.NOTION_POSTS_API_KEY });
+const notionClient = process.env.NOTION_POSTS_API_KEY ? new Client({ auth: process.env.NOTION_POSTS_API_KEY }) : null;
 const notionAPI = new NotionAPI();
 
 const databaseId = process.env.NOTION_POSTS_DATABASE_ID!;
@@ -57,6 +57,11 @@ function pageToPost(page: PageObjectResponse): Post {
 }
 
 async function queryDatabase(filter?: any, sorts?: any, pageSize?: number, startCursor?: string): Promise<PaginatedPosts> {
+    if (!notionClient || !databaseId) {
+        console.error('Notion API key or Database ID is not configured in .env file');
+        return { posts: [], total: 0, nextCursor: null };
+    }
+
     try {
         const response: QueryDatabaseResponse = await notionClient.databases.query({
             database_id: databaseId,
@@ -84,7 +89,7 @@ async function queryDatabase(filter?: any, sorts?: any, pageSize?: number, start
                 return queryDatabase(undefined, undefined, pageSize, startCursor);
             }
         }
-        console.error("Error querying Notion database:", error);
+        console.error("Error querying Notion database:", error.message);
         return { posts: [], total: 0, nextCursor: null };
     }
 }
@@ -219,6 +224,10 @@ export async function getPublishedPages(): Promise<Post[]> {
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
+    if (!notionClient || !databaseId) {
+        console.error('Notion API key or Database ID is not configured in .env file');
+        return null;
+    }
   const response = await notionClient.databases.query({
     database_id: databaseId,
     filter: {
