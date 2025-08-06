@@ -7,7 +7,7 @@ import type { Post } from '@/lib/posts';
 import { ThemeToggle } from './theme-toggle';
 import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
-import { LinkIcon } from 'lucide-react';
+import { Tag, FileText } from 'lucide-react';
 
 const transition = {
   type: 'spring',
@@ -87,17 +87,18 @@ const Menu = ({
   );
 };
 
-const HoveredLink = ({ children, ...rest }: any) => {
-  return (
-    <Link
-      {...rest}
-      className="text-muted-foreground hover:text-foreground flex items-center gap-2"
-    >
-        <LinkIcon size={16} />
+const HoveredLink = ({ children, icon, ...rest }: any) => {
+    const Icon = icon;
+    return (
+      <Link
+        {...rest}
+        className="text-muted-foreground hover:text-foreground flex items-center gap-2"
+      >
+        <Icon size={16} />
         {children}
-    </Link>
-  );
-};
+      </Link>
+    );
+  };
 
 export function Navbar({ tags, pages }: { tags: string[], pages: Post[] }) {
   const [active, setActive] = useState<string | null>(null);
@@ -111,14 +112,14 @@ export function Navbar({ tags, pages }: { tags: string[], pages: Post[] }) {
             <MenuItem setActive={setActive} active={active} item="Tags">
             <div className="flex flex-col space-y-4 text-sm">
                 {tags.map((tag) => (
-                    <HoveredLink key={tag} href={`/?tag=${encodeURIComponent(tag)}`}>{tag}</HoveredLink>
+                    <HoveredLink key={tag} href={`/?tag=${encodeURIComponent(tag)}`} icon={Tag}>{tag}</HoveredLink>
                 ))}
             </div>
             </MenuItem>
             <MenuItem setActive={setActive} active={active} item="Pages">
             <div className="flex flex-col space-y-4 text-sm">
                 {pages.map((page) => (
-                    <HoveredLink key={page.id} href={`/${page.slug}`}>{page.title}</HoveredLink>
+                    <HoveredLink key={page.id} href={`/${page.slug}`} icon={FileText}>{page.title}</HoveredLink>
                 ))}
             </div>
             </MenuItem>
