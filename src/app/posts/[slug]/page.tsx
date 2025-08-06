@@ -15,7 +15,7 @@ type PostPageProps = {
 };
 
 export async function generateStaticParams() {
-  const posts = await getPublishedPosts();
+  const { posts } = await getPublishedPosts({ pageSize: 100 });
   return posts.map((post) => ({
     slug: post.slug,
   }));
