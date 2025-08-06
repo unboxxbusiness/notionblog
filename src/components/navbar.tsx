@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils'
 import { Tag, FileText, Search, Menu as MenuIcon, X } from 'lucide-react'
 import { NavbarSearchInput } from './navbar-search-input'
 import { Button } from './ui/button';
-import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 
 const transition = {
@@ -173,6 +173,9 @@ export function Navbar({
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <SheetHeader>
+                <SheetTitle className="sr-only">Menu</SheetTitle>
+              </SheetHeader>
               <div className="p-4">
                 <div className="mb-8">
                   <NavbarSearchInput />
