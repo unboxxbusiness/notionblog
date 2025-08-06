@@ -1,4 +1,3 @@
-// HMR comment
 import { getPostBySlug, getPublishedPosts } from '@/lib/posts';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -8,6 +7,7 @@ import { format } from 'date-fns';
 import { SuggestSummaryForm } from './suggest-summary-form';
 import { ArrowLeft } from 'lucide-react';
 import { PostRenderer } from '@/components/post-renderer';
+import { RelatedPosts } from './related-posts';
 
 type PostPageProps = {
   params: {
@@ -23,7 +23,7 @@ export async function generateStaticParams() {
 }
 
 export default async function PostPage({ params }: PostPageProps) {
-  const post = await getPostBySlug(params.slug);
+  const { post, relatedPosts } = await getPostBySlug(params.slug);
 
   if (!post || !post.recordMap) {
     notFound();
@@ -73,6 +73,12 @@ export default async function PostPage({ params }: PostPageProps) {
       <div className="mt-16 border-t pt-8 max-w-2xl mx-auto">
           <SuggestSummaryForm />
       </div>
+      
+      {relatedPosts.length > 0 && (
+        <div className="mt-16 border-t pt-8">
+          <RelatedPosts posts={relatedPosts} />
+        </div>
+      )}
     </article>
   );
 }
