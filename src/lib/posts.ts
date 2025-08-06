@@ -54,15 +54,22 @@ function pageToPost(page: PageObjectResponse): Post {
 }
 
 async function queryDatabase(
-    client: Client,
-    databaseId: string,
     filter?: any,
     sorts?: any,
     pageSize?: number,
     startCursor?: string
 ): Promise<QueryDatabaseResponse> {
+    const notionPostsClient = process.env.NOTION_POSTS_API_KEY ? new Client({ auth: process.env.NOTION_POSTS_API_KEY }) : null;
+    const databaseId = process.env.NOTION_POSTS_DATABASE_ID;
+
+    if (!notionPostsClient || !databaseId) {
+        console.error('NOTION_POSTS_API_KEY or NOTION_POSTS_DATABASE_ID is not configured.');
+        // Return a structure that matches what the caller expects, but is empty.
+        return { results: [], next_cursor: null, has_more: false, type: 'page_or_database', page_or_database: {} };
+    }
+
     try {
-        const response = await client.databases.query({
+        const response = await notionPostsClient.databases.query({
             database_id: databaseId,
             filter,
             sorts,
@@ -72,7 +79,8 @@ async function queryDatabase(
         return response;
     } catch (error: any) {
         console.error(`Error querying Notion database (ID: ${databaseId}):`, error.message);
-        throw new Error(`Failed to query Notion database. Check if the database ID is correct and shared with the integration.`);
+        // In case of error, return an empty structure to avoid crashing consumers.
+        return { results: [], next_cursor: null, has_more: false, type: 'page_or_database', page_or_database: {} };
     }
 }
 
@@ -89,14 +97,6 @@ export async function getPublishedPosts({
     pageSize?: number;
 } = {}): Promise<{posts: Post[], totalPosts: number, currentPage: number}> {
   
-  const notionPostsClient = process.env.NOTION_POSTS_API_KEY ? new Client({ auth: process.env.NOTION_POSTS_API_KEY }) : null;
-  const postsDatabaseId = process.env.NOTION_POSTS_DATABASE_ID;
-
-  if (!notionPostsClient || !postsDatabaseId) {
-    console.error('NOTION_POSTS_API_KEY or NOTION_POSTS_DATABASE_ID is not configured.');
-    return { posts: [], totalPosts: 0, currentPage: page };
-  }
-
   const filters: any[] = [
     { property: 'Type', select: { equals: 'post' } },
     { property: 'Status', status: { equals: 'Published' } },
@@ -116,22 +116,17 @@ export async function getPublishedPosts({
   }
 
   try {
-    // First, query without pagination to get the total count.
-    const countResponse = await queryDatabase(
-        notionPostsClient,
-        postsDatabaseId,
+    const response = await queryDatabase(
         { and: filters },
-        undefined,
-        100 // Notion's max page size is 100
+        [{ property: 'PublishedDate', direction: 'descending' }],
+        100 // Fetch all posts up to Notion's limit
     );
-    const totalPosts = countResponse.results.length;
-
-    // Then, query with pagination. This is not ideal, but Notion API doesn't give a total count.
-    // We are fetching all posts and slicing. For larger blogs, a cursor-based approach would be better.
-     const allPosts = countResponse.results
+    
+    const allPosts = response.results
      .filter((p): p is PageObjectResponse => 'properties' in p)
      .map(pageToPost);
 
+    const totalPosts = allPosts.length;
     const paginatedPosts = allPosts.slice((page - 1) * pageSize, page * pageSize);
 
     return { posts: paginatedPosts, totalPosts, currentPage: page };
@@ -142,17 +137,8 @@ export async function getPublishedPosts({
 }
 
 export async function getLatestPost(): Promise<Post | null> {
-    const notionPostsClient = process.env.NOTION_POSTS_API_KEY ? new Client({ auth: process.env.NOTION_POSTS_API_KEY }) : null;
-    const postsDatabaseId = process.env.NOTION_POSTS_DATABASE_ID;
-
-    if (!notionPostsClient || !postsDatabaseId) {
-        return null;
-    }
-    
     try {
         const response = await queryDatabase(
-            notionPostsClient,
-            postsDatabaseId,
             { and: [
                 { property: 'Type', select: { equals: 'post' } },
                 { property: 'Status', status: { equals: 'Published' } },
@@ -170,16 +156,8 @@ export async function getLatestPost(): Promise<Post | null> {
 
 
 export async function getPublishedPages(): Promise<Post[]> {
-  const notionPostsClient = process.env.NOTION_POSTS_API_KEY ? new Client({ auth: process.env.NOTION_POSTS_API_KEY }) : null;
-  const postsDatabaseId = process.env.NOTION_POSTS_DATABASE_ID;
-
-  if (!notionPostsClient || !postsDatabaseId) {
-    console.error('NOTION_POSTS_API_KEY or NOTION_POSTS_DATABASE_ID is not configured.');
-    return [];
-  }
-  
   try {
-    const response = await queryDatabase(notionPostsClient, postsDatabaseId, {
+    const response = await queryDatabase({
         and: [
             { property: 'Type', select: { equals: 'page' } },
             { property: 'Status', status: { equals: 'Published' } }
@@ -225,18 +203,8 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 }
 
 export async function getAllTags(): Promise<string[]> {
-    const notionPostsClient = process.env.NOTION_POSTS_API_KEY ? new Client({ auth: process.env.NOTION_POSTS_API_KEY }) : null;
-    const postsDatabaseId = process.env.NOTION_POSTS_DATABASE_ID;
-
-    if (!notionPostsClient || !postsDatabaseId) {
-        console.error('NOTION_POSTS_API_KEY or NOTION_POSTS_DATABASE_ID is not configured.');
-        return [];
-    }
-
     try {
         const response = await queryDatabase(
-            notionPostsClient,
-            postsDatabaseId,
             { and: [
                 { property: 'Type', select: { equals: 'post' } },
                 { property: 'Status', status: { equals: 'Published' } },
@@ -248,7 +216,7 @@ export async function getAllTags(): Promise<string[]> {
         const tags = new Set<string>();
         response.results.forEach(result => {
             if ('properties' in result) {
-                const post = pageToPost(result);
+                const post = pageToPost(result as PageObjectResponse);
                 post.tags.forEach(tag => tags.add(tag));
             }
         });
