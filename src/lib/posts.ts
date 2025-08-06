@@ -25,10 +25,10 @@ export type PaginatedPosts = {
     nextCursor: string | null;
 }
 
-const notionClient = new Client({ auth: process.env.NOTION_TOKEN });
+const notionClient = new Client({ auth: process.env.NOTION_API_KEY });
 const notionAPI = new NotionAPI();
 
-const databaseId = process.env.NOTION_DATABASE_ID!;
+const databaseId = process.env.NOTION_POSTS_DATABASE_ID!;
 
 function pageToPost(page: PageObjectResponse): Post {
     let cover = '';
@@ -108,6 +108,12 @@ export async function getPublishedPosts({
       select: {
         equals: 'post',
       },
+    },
+    {
+      property: 'Status',
+      status: {
+        equals: 'Published',
+      },
     }
   ];
 
@@ -172,7 +178,10 @@ export async function getPublishedPosts({
 export async function getLatestPost(): Promise<Post | null> {
     try {
         const result = await queryDatabase(
-            { property: 'Type', select: { equals: 'post' } },
+            { and: [
+                { property: 'Type', select: { equals: 'post' } },
+                { property: 'Status', status: { equals: 'Published' } },
+            ]},
             [{ property: 'PublishedDate', direction: 'descending' }],
             1
         );
@@ -186,10 +195,20 @@ export async function getLatestPost(): Promise<Post | null> {
 export async function getPublishedPages(): Promise<Post[]> {
   try {
     const result = await queryDatabase({
-      property: 'Type',
-      select: {
-          equals: 'page',
-      }
+        and: [
+            {
+                property: 'Type',
+                select: {
+                    equals: 'page',
+                }
+            },
+            {
+                property: 'Status',
+                status: {
+                    equals: 'Published',
+                }
+            }
+        ]
     });
     return result.posts;
   } catch(e) {
@@ -224,7 +243,10 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 
 export async function getAllTags(): Promise<string[]> {
     const result = await queryDatabase(
-        { property: 'Type', select: { equals: 'post' } }, 
+        { and: [
+            { property: 'Type', select: { equals: 'post' } },
+            { property: 'Status', status: { equals: 'Published' } },
+        ]}, 
         undefined, 
         100 // fetch up to 100 posts to build the tag list
     );

@@ -3,7 +3,7 @@
 import { z } from 'zod';
 import { Client } from '@notionhq/client';
 
-const notion = new Client({ auth: process.env.NOTION_TOKEN });
+const notion = new Client({ auth: process.env.NOTION_API_KEY });
 const databaseId = process.env.NOTION_SUBSCRIBERS_DATABASE_ID!;
 
 const subscribeSchema = z.object({
