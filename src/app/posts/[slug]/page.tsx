@@ -1,4 +1,5 @@
 
+'use client';
 import { getPostBySlug, getPublishedPosts } from '@/lib/posts';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';

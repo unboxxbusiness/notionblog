@@ -1,6 +1,6 @@
 
 import Link from 'next/link';
-import { getPublishedPosts, getAllTags, getLatestPost } from '@/lib/posts';
+import { getPublishedPosts, getAllTags, getLatestPost, getPublishedPages } from '@/lib/posts';
 import { PostCard } from '@/components/post-card';
 import { Badge } from '@/components/ui/badge';
 import { TagFilters } from '@/components/tag-filters';
@@ -11,6 +11,9 @@ import { format } from 'date-fns';
 import { ArrowRight } from 'lucide-react';
 import { Pagination } from '@/components/pagination';
 import { HomeSidebar } from '@/components/home-sidebar';
+import RootLayout from './layout';
+import { Navbar } from '@/components/navbar';
+import { Footer } from '@/components/footer';
 
 
 const POSTS_PER_PAGE = 6;
@@ -122,25 +125,30 @@ export default async function Home({
   const currentQuery = searchParams?.q;
   const currentPage = Number(searchParams?.page || '1');
   const allTags = await getAllTags();
+  const allPages = await getPublishedPages();
   
   return (
-    <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <Suspense fallback={<div className="h-28" />}>
-        <LatestPostHero />
-      </Suspense>
+    <RootLayout>
+      <Navbar tags={allTags} pages={allPages} />
+      <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <Suspense fallback={<div className="h-28" />}>
+          <LatestPostHero />
+        </Suspense>
 
-      <div className="grid lg:grid-cols-3 gap-12">
-        <section className="lg:col-span-2">
-            <Suspense fallback={null}>
-                <TagFilters tags={allTags} />
-            </Suspense>
-            <PostsGrid tag={currentTag} query={currentQuery} page={currentPage} />
-        </section>
+        <div className="grid lg:grid-cols-3 gap-12">
+          <section className="lg:col-span-2">
+              <Suspense fallback={null}>
+                  <TagFilters tags={allTags} />
+              </Suspense>
+              <PostsGrid tag={currentTag} query={currentQuery} page={currentPage} />
+          </section>
 
-        <aside className="lg:col-span-1">
-            <HomeSidebar />
-        </aside>
+          <aside className="lg:col-span-1">
+              <HomeSidebar />
+          </aside>
+        </div>
       </div>
-    </div>
+      <Footer pages={allPages} />
+    </RootLayout>
   );
 }

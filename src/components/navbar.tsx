@@ -102,7 +102,7 @@ const HoveredLink = ({ children, icon, ...rest }: any) => {
     );
   };
 
-export function Navbar({ tags, pages }: { tags: string[], pages: Post[] }) {
+export function Navbar({ tags = [], pages = [] }: { tags?: string[], pages?: Post[] }) {
   const [active, setActive] = useState<string | null>(null);
 
   return (

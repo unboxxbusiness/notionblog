@@ -5,7 +5,7 @@ import Link from "next/link"
 import type { Post } from "@/lib/posts"
 import { NewsletterForm } from "./newsletter-form"
 
-export function Footer({ pages }: { pages: Post[] }) {
+export function Footer({ pages = [] }: { pages?: Post[] }) {
   return (
     <footer className="bg-background py-12 border-t">
       <div className="container mx-auto px-4 md:px-6">
