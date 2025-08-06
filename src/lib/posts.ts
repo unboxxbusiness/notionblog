@@ -80,15 +80,28 @@ async function queryDatabase(filter?: any, sorts?: any) {
 }
 
 
-export async function getPublishedPosts(): Promise<Post[]> {
+export async function getPublishedPosts({ tag }: { tag?: string } = {}): Promise<Post[]> {
+  const filters: any[] = [
+    {
+      property: 'Type',
+      select: {
+        equals: 'post',
+      },
+    }
+  ];
+
+  if (tag) {
+    filters.push({
+      property: 'Tags',
+      multi_select: {
+        contains: tag,
+      },
+    });
+  }
+
   try {
     return await queryDatabase(
-      {
-        property: 'Type',
-        select: {
-          equals: 'post',
-        },
-      },
+      { and: filters },
       [
         {
           property: 'PublishedDate',
@@ -100,18 +113,25 @@ export async function getPublishedPosts(): Promise<Post[]> {
     // If the initial query fails (e.g., missing Type or PublishedDate property),
     // try fetching all documents without filtering or sorting.
     console.warn("Could not fetch filtered or sorted posts, falling back to all documents.", e)
-    return queryDatabase();
+    const allPosts = await queryDatabase();
+    return allPosts.filter(p => p.type === 'post');
   }
 }
 
 export async function getPublishedPages(): Promise<Post[]> {
-    return queryDatabase({
-        property: 'Type',
-        select: {
-            equals: 'page',
-        }
+  try {
+    return await queryDatabase({
+      property: 'Type',
+      select: {
+          equals: 'page',
+      }
     });
+  } catch(e) {
+    console.warn("Could not fetch pages, falling back to all documents.", e);
+    const allDocs = await queryDatabase();
+    return allDocs.filter(p => p.type === 'page');
   }
+}
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   const response = await notionClient.databases.query({

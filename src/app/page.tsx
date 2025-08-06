@@ -9,14 +9,10 @@ export default async function Home({
 }: {
   searchParams?: { tag?: string };
 }) {
-  const allPosts = await getPublishedPosts();
-  const allTags = await getAllTags();
   const currentTag = searchParams?.tag;
-
-  const filteredPosts = currentTag
-    ? allPosts.filter((post) => post.tags.includes(currentTag))
-    : allPosts;
-
+  const posts = await getPublishedPosts({ tag: currentTag });
+  const allTags = await getAllTags();
+  
   return (
     <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
       <section className="text-center my-8">
@@ -50,9 +46,9 @@ export default async function Home({
           ))}
         </div>
 
-        {filteredPosts.length > 0 ? (
+        {posts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredPosts.map((post) => (
+            {posts.map((post) => (
               <PostCard key={post.id} post={post} />
             ))}
           </div>

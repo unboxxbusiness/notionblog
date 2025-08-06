@@ -38,7 +38,7 @@ export function Header({ tags, pages }: { tags: string[], pages: Post[] }) {
                     <NavigationMenu className="flex justify-start items-start">
                         <NavigationMenuList className="flex justify-start gap-4 flex-row">
                             <NavigationMenuItem>
-                                <Link href="/" legacyBehavior={false} passHref>
+                                <Link href="/" legacyBehavior passHref>
                                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                                         Home
                                     </NavigationMenuLink>
