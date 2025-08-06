@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Twitter, Facebook, Linkedin } from 'lucide-react';
+import { Twitter, Facebook, Linkedin, Share2 } from 'lucide-react';
 
 interface SocialBoxProps {
   href: string;
@@ -40,7 +40,9 @@ export function SocialShare({ title, slug }: { title:string, slug:string }) {
     <div className="fixed bottom-8 right-8 z-50">
         <div className="card">
             <div className="background" />
-            <div className="logo">SHARE</div>
+            <div className="logo" title="Share">
+              <Share2 />
+            </div>
 
             {socialLinks.map((link, index) => (
             <SocialBox
