@@ -1,3 +1,4 @@
+
 'use client';
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -6,6 +7,7 @@ import type { Post } from '@/lib/posts';
 import { ThemeToggle } from './theme-toggle';
 import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
+import { LinkIcon } from 'lucide-react';
 
 const transition = {
   type: 'spring',
@@ -89,9 +91,10 @@ const HoveredLink = ({ children, ...rest }: any) => {
   return (
     <Link
       {...rest}
-      className="text-muted-foreground hover:text-foreground"
+      className="text-muted-foreground hover:text-foreground flex items-center gap-2"
     >
-      {children}
+        <LinkIcon size={16} />
+        {children}
     </Link>
   );
 };
