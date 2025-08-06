@@ -9,23 +9,21 @@ import { useEffect, useState } from 'react';
 
 export function PostRenderer({ recordMap }: { recordMap: RecordMap }) {
   const { resolvedTheme } = useTheme();
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
+  const [mounted, setMounted] = useState(false)
+  
   useEffect(() => {
-    setIsDarkMode(resolvedTheme === 'dark');
-  }, [resolvedTheme]);
+    setMounted(true)
+  }, [])
 
-  // To prevent hydration mismatch, we can return a placeholder or null on the server
-  // and then render the full component on the client.
-  if (typeof window === 'undefined') {
-    return null;
+  if (!mounted) {
+    return null
   }
 
   return (
     <NotionRenderer
       recordMap={recordMap}
       fullPage={false}
-      darkMode={isDarkMode}
+      darkMode={resolvedTheme === 'dark'}
       className="prose dark:prose-invert max-w-none 
                  prose-headings:font-headline prose-p:text-foreground/80
                  prose-a:text-primary hover:prose-a:text-primary/80 prose-strong:text-foreground
