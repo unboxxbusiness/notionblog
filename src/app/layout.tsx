@@ -3,7 +3,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { getAllTags, getPublishedPages } from '@/lib/posts';
-import { Navbar } from '@/components/navbar';
+import { Header } from '@/components/header';
 
 export const metadata: Metadata = {
   title: 'Muse',
@@ -29,7 +29,7 @@ export default async function RootLayout({
       <body className="font-body antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <div className="flex flex-col min-h-screen">
-            <Navbar tags={allTags} pages={allPages} />
+            <Header tags={allTags} pages={allPages} />
             <main className="flex-grow pt-28">{children}</main>
           </div>
           <Toaster />
