@@ -16,6 +16,18 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'www.notion.so',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'prod.dir.s3.amazonaws.com',
+        port: '',
+        pathname: '/**',
+      }
     ],
   },
 };
