@@ -1,6 +1,6 @@
 'use client'
 import { motion } from "framer-motion"
-import { Plus, type LucideIcon } from "lucide-react"
+import { Share, type LucideIcon } from "lucide-react"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 
@@ -24,39 +24,30 @@ export function AnimatedSocialIcons({
 }: AnimatedSocialIconsProps) {
   const [active, setActive] = useState(false)
 
-  const buttonSize = "size-10 sm:size-16"
+  const buttonSize = "size-10 sm:size-12"
 
   return (
-    <div className={cn("w-full relative flex items-start justify-start sm:justify-center", className)}>
-      <div className="flex items-center justify-center relative gap-4">
-        <motion.div
-          className="absolute left-0 bg-background w-full rounded-full z-10"
-          animate={{
-            x: active ? "calc(100% + 16px)" : 0,
-          }}
-          transition={{ type: "spring", stiffness: 200, damping: 20 }}
-        >
-          <motion.button
+    <div className={cn("relative flex flex-col items-center gap-4", className)}>
+        <motion.button
             className={cn(
-              buttonSize,
-              "rounded-full flex items-center justify-center",
-              "bg-primary hover:bg-primary/90 transition-colors"
+            buttonSize,
+            "rounded-full flex items-center justify-center",
+            "bg-primary hover:bg-primary/90 transition-colors z-10"
             )}
             onClick={() => setActive(!active)}
             animate={{ rotate: active ? 45 : 0 }}
             transition={{
-              type: "spring",
-              stiffness: 200,
-              damping: 20,
+                type: "spring",
+                stiffness: 200,
+                damping: 20,
             }}
-          >
-            <Plus
-               size={iconSize}
-               strokeWidth={3}
-               className="text-primary-foreground"
-             />
-          </motion.button>
-        </motion.div>
+        >
+            <Share
+                size={iconSize}
+                strokeWidth={2.5}
+                className="text-primary-foreground"
+                />
+        </motion.button>
                  
         {icons.map(({ Icon, href, className, onClick }, index) => (
           <motion.div
@@ -68,11 +59,11 @@ export function AnimatedSocialIcons({
               "border",
               className
             )}
-            initial={{ scale: 0, opacity: 0, x: -100 }}
+            initial={{ scale: 0, opacity: 0, y: -20 }}
             animate={{
               scale: active ? 1 : 0,
               opacity: active ? 1 : 0,
-              x: active ? 0 : -100,
+              y: active ? 0 : -20,
             }}
             transition={{
               type: "spring",
@@ -104,6 +95,5 @@ export function AnimatedSocialIcons({
           </motion.div>
         ))}
       </div>
-    </div>
   )
 }

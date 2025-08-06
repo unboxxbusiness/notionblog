@@ -53,7 +53,7 @@ export function SocialShare({ title, slug }: { title: string; slug: string }) {
   ];
 
   return (
-    <div className="py-8">
+    <div className="fixed top-1/2 right-4 sm:right-8 transform -translate-y-1/2 z-50 bg-background/50 p-2 rounded-full border shadow-lg backdrop-blur-md">
       <AnimatedSocialIcons icons={socialIcons} />
     </div>
   );

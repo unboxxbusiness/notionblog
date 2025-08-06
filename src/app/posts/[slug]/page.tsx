@@ -71,7 +71,7 @@ export default async function PostPage({ params }: PostPageProps) {
         <PostRenderer recordMap={post.recordMap} />
       </div>
 
-      <div className="border-t">
+      <div>
         <SocialShare title={post.title} slug={post.slug} />
       </div>
 
