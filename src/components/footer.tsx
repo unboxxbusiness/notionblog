@@ -4,7 +4,7 @@ import { Icons } from "@/components/ui/icons"
 import { Button } from "@/components/ui/button"
 import { Facebook, Instagram, Linkedin, Twitter, Feather } from "lucide-react"
 import Link from "next/link"
-import type { Post } from "@/lib/posts"
+import type { Post } from "@/lib/types"
 import { NewsletterForm } from "./newsletter-form"
 
 export function Footer({ pages = [] }: { pages?: Post[] }) {

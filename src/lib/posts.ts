@@ -4,27 +4,8 @@ import { NotionAPI } from 'notion-client';
 import type { PageObjectResponse, QueryDatabaseResponse } from '@notionhq/client/build/src/api-endpoints';
 import type { RecordMap } from 'notion-types';
 import { cache } from 'react';
+import type { Post } from './types';
 
-export type Post = {
-  id: string;
-  slug: string;
-  title: string;
-  tags: string[];
-  author: string;
-  publishedDate: string;
-  featuredImage: string;
-  featuredImageHint: string;
-  content: string; // This will now be the page ID to fetch from notion-client
-  recordMap?: RecordMap;
-  excerpt: string;
-  type: 'post' | 'page';
-};
-
-export type PaginatedPosts = {
-    posts: Post[];
-    totalPosts: number;
-    nextCursor: string | null;
-}
 
 const notionAPI = new NotionAPI();
 

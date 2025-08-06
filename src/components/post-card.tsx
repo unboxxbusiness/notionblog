@@ -1,6 +1,6 @@
 
 import Link from 'next/link';
-import type { Post } from '@/lib/posts';
+import type { Post } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';

@@ -1,9 +1,9 @@
 
 'use client';
-import React, 'useState'
+import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import type { Post } from '@/lib/posts'
+import type { Post } from '@/lib/types'
 import { ThemeToggle } from './theme-toggle'
 import { cn } from '@/lib/utils'
 import { useTheme } from 'next-themes'

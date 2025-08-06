@@ -1,5 +1,5 @@
 import { PostCard } from '@/components/post-card';
-import type { Post } from '@/lib/posts';
+import type { Post } from '@/lib/types';
 
 export function RelatedPosts({ posts }: { posts: Post[] }) {
   return (
