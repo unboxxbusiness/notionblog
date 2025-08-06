@@ -3,6 +3,7 @@ import { getPublishedPosts, getAllTags } from '@/lib/posts';
 import { PostCard } from '@/components/post-card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { HomeHero } from '@/components/home-hero';
 
 export default async function Home({
   searchParams,
@@ -15,14 +16,7 @@ export default async function Home({
   
   return (
     <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      <section className="text-center my-8">
-        <h1 className="text-4xl font-bold font-headline tracking-tight sm:text-5xl lg:text-6xl">
-          Creativity & Code
-        </h1>
-        <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-          A blog for creative minds and curious souls. Explore topics in design, development, and AI.
-        </p>
-      </section>
+      <HomeHero />
 
       <section className="my-12">
         <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
