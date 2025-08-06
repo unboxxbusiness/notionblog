@@ -11,6 +11,12 @@ import { format } from 'date-fns';
 import { ArrowRight } from 'lucide-react';
 import { Pagination } from '@/components/pagination';
 import { HomeSidebar } from '@/components/home-sidebar';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Muse | A Blog for Creative Minds and Curious Souls',
+  description: 'Explore topics in design, development, and AI. A blog for creative minds and curious souls.',
+};
 
 
 const POSTS_PER_PAGE = 6;
