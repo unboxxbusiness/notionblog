@@ -19,6 +19,12 @@ export type Post = {
   type: 'post' | 'page';
 };
 
+export type PaginatedPosts = {
+    posts: Post[];
+    total: number;
+    nextCursor: string | null;
+}
+
 const notionClient = new Client({ auth: process.env.NOTION_TOKEN });
 const notionAPI = new NotionAPI();
 
@@ -50,38 +56,52 @@ function pageToPost(page: PageObjectResponse): Post {
     };
 }
 
-async function queryDatabase(filter?: any, sorts?: any) {
+async function queryDatabase(filter?: any, sorts?: any, pageSize?: number, startCursor?: string): Promise<PaginatedPosts> {
     try {
         const response: QueryDatabaseResponse = await notionClient.databases.query({
             database_id: databaseId,
             filter,
             sorts,
+            page_size: pageSize,
+            start_cursor: startCursor,
         });
-        return response.results
+
+        const posts = response.results
             .filter((page): page is PageObjectResponse => 'properties' in page)
             .map(pageToPost);
+
+        return {
+            posts,
+            total: (response as any).total_matches || posts.length, // total_matches is not in the type for some reason
+            nextCursor: response.next_cursor,
+        };
+
     } catch (error: any) {
-        // If a sort or filter property doesn't exist, Notion throws an error.
-        // We can catch it and try again without the problematic parts.
         if (error.code === 'validation_error') {
             console.warn(`Notion API validation error: ${error.message}. Retrying...`);
-            if (error.message.includes('sort property')) {
-                // Retry without sorting
-                return queryDatabase(filter, undefined);
-            }
-            if (error.message.includes('property') && filter) {
-                 // Retry without filtering
-                 return queryDatabase(undefined, sorts);
+             // This is a simplified retry, a more robust solution might be needed
+            if (error.message.includes('sort') || error.message.includes('filter')) {
+                return queryDatabase(undefined, undefined, pageSize, startCursor);
             }
         }
-        // If it's a different error, we still want to know about it.
         console.error("Error querying Notion database:", error);
-        return [];
+        return { posts: [], total: 0, nextCursor: null };
     }
 }
 
 
-export async function getPublishedPosts({ tag, query }: { tag?: string, query?: string } = {}): Promise<Post[]> {
+export async function getPublishedPosts({ 
+    tag, 
+    query,
+    page = 1,
+    pageSize = 15,
+}: { 
+    tag?: string;
+    query?: string;
+    page?: number;
+    pageSize?: number;
+} = {}): Promise<{posts: Post[], totalPosts: number, currentPage: number}> {
+  
   const filters: any[] = [
     {
       property: 'Type',
@@ -119,37 +139,63 @@ export async function getPublishedPosts({ tag, query }: { tag?: string, query?: 
     })
   }
 
+  // Notion API doesn't have offset-based pagination. We fetch all and slice.
+  // This is not ideal for very large datasets, but works for most blogs.
+  // For true pagination, we'd need cursor-based navigation on the frontend.
   try {
-    return await queryDatabase(
+    const allPostsResult = await queryDatabase(
       { and: filters },
-      [
-        {
-          property: 'PublishedDate',
-          direction: 'descending',
-        },
-      ]
+      [{ property: 'PublishedDate', direction: 'descending' }],
+      100 // Fetch up to 100 posts that match the filter
     );
+
+    const allPosts = allPostsResult.posts;
+    const totalPosts = allPosts.length;
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedPosts = allPosts.slice(startIndex, endIndex);
+
+    return { posts: paginatedPosts, totalPosts, currentPage: page };
   } catch (e) {
-    // If the initial query fails (e.g., missing Type or PublishedDate property),
-    // try fetching all documents without filtering or sorting.
     console.warn("Could not fetch filtered or sorted posts, falling back to all documents.", e)
-    const allPosts = await queryDatabase();
-    return allPosts.filter(p => p.type === 'post');
+    const allPostsResult = await queryDatabase(undefined, undefined, 100);
+    const allPosts = allPostsResult.posts.filter(p => p.type === 'post');
+    const totalPosts = allPosts.length;
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedPosts = allPosts.slice(startIndex, endIndex);
+
+    return { posts: paginatedPosts, totalPosts, currentPage: page };
   }
 }
 
+export async function getLatestPost(): Promise<Post | null> {
+    try {
+        const result = await queryDatabase(
+            { property: 'Type', select: { equals: 'post' } },
+            [{ property: 'PublishedDate', direction: 'descending' }],
+            1
+        );
+        return result.posts[0] || null;
+    } catch (e) {
+        return null;
+    }
+}
+
+
 export async function getPublishedPages(): Promise<Post[]> {
   try {
-    return await queryDatabase({
+    const result = await queryDatabase({
       property: 'Type',
       select: {
           equals: 'page',
       }
     });
+    return result.posts;
   } catch(e) {
     console.warn("Could not fetch pages, falling back to all documents.", e);
-    const allDocs = await queryDatabase();
-    return allDocs.filter(p => p.type === 'page');
+    const allDocsResult = await queryDatabase();
+    return allDocsResult.posts.filter(p => p.type === 'page');
   }
 }
 
@@ -177,9 +223,13 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 }
 
 export async function getAllTags(): Promise<string[]> {
-    const posts = await getPublishedPosts();
+    const result = await queryDatabase(
+        { property: 'Type', select: { equals: 'post' } }, 
+        undefined, 
+        100 // fetch up to 100 posts to build the tag list
+    );
     const tags = new Set<string>();
-    posts.forEach(post => {
+    result.posts.forEach(post => {
         post.tags.forEach(tag => tags.add(tag));
     });
     return Array.from(tags).sort();

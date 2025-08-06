@@ -1,21 +1,65 @@
 import Link from 'next/link';
-import { getPublishedPosts, getAllTags } from '@/lib/posts';
+import { getPublishedPosts, getAllTags, getLatestPost } from '@/lib/posts';
 import { PostCard } from '@/components/post-card';
 import { Badge } from '@/components/ui/badge';
 import { TagFilters } from '@/components/tag-filters';
 import { Suspense } from 'react';
 import { HomeHero } from '@/components/home-hero';
+import Image from 'next/image';
+import { format } from 'date-fns';
+import { ArrowRight } from 'lucide-react';
+import { Pagination } from '@/components/pagination';
 
-function PostsGrid({ tag, query }: { tag?: string; query?: string }) {
+const POSTS_PER_PAGE = 6;
+
+async function LatestPostHero() {
+  const latestPost = await getLatestPost();
+
+  if (!latestPost) {
+    return <HomeHero />;
+  }
+
+  return (
+    <section className="mb-12">
+        <Link href={`/posts/${latestPost.slug}`}>
+            <div className="grid md:grid-cols-2 gap-8 items-center bg-muted/50 rounded-lg overflow-hidden p-8 transition-transform hover:scale-[1.02]">
+                <div className="relative aspect-[16/9] w-full overflow-hidden rounded-md">
+                    <Image
+                        src={latestPost.featuredImage}
+                        alt={latestPost.title}
+                        fill
+                        className="object-cover"
+                        priority
+                        data-ai-hint={latestPost.featuredImageHint}
+                    />
+                </div>
+                <div>
+                    <Badge variant="default" className="mb-4">Latest Post</Badge>
+                    <h2 className="font-headline text-3xl font-bold mb-4">{latestPost.title}</h2>
+                    <p className="text-muted-foreground mb-4 line-clamp-3">{latestPost.excerpt}</p>
+                    <div className="text-sm text-muted-foreground mb-4">
+                        {format(new Date(latestPost.publishedDate), 'MMMM d, yyyy')}
+                    </div>
+                    <div className="flex items-center text-primary font-semibold">
+                        Read more <ArrowRight className="ml-2 size-4" />
+                    </div>
+                </div>
+            </div>
+        </Link>
+    </section>
+  )
+}
+
+function PostsGrid({ tag, query, page }: { tag?: string; query?: string, page: number }) {
   return (
     <Suspense fallback={<PostsSkeleton />}>
-      <PostsGridContent tag={tag} query={query} />
+      <PostsGridContent tag={tag} query={query} page={page} />
     </Suspense>
   )
 }
 
-async function PostsGridContent({ tag, query }: { tag?: string, query?: string }) {
-  const posts = await getPublishedPosts({ tag, query });
+async function PostsGridContent({ tag, query, page }: { tag?: string, query?: string, page: number }) {
+  const { posts, totalPosts } = await getPublishedPosts({ tag, query, page, pageSize: POSTS_PER_PAGE });
 
   if (posts.length === 0) {
     return (
@@ -32,11 +76,18 @@ async function PostsGridContent({ tag, query }: { tag?: string, query?: string }
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {posts.map((post) => (
+          <PostCard key={post.id} post={post} />
+        ))}
+      </div>
+      <Pagination 
+        currentPage={page} 
+        totalPages={Math.ceil(totalPosts / POSTS_PER_PAGE)}
+        className="mt-12"
+      />
+    </>
   )
 }
 
@@ -59,16 +110,17 @@ function PostsSkeleton() {
 export default async function Home({
   searchParams,
 }: {
-  searchParams?: { tag?: string; q?: string };
+  searchParams?: { tag?: string; q?: string; page?: string };
 }) {
   const currentTag = searchParams?.tag;
   const currentQuery = searchParams?.q;
+  const currentPage = Number(searchParams?.page || '1');
   const allTags = await getAllTags();
   
   return (
     <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
       <Suspense fallback={<div className="h-28" />}>
-        <HomeHero />
+        <LatestPostHero />
       </Suspense>
 
       <section className="my-12">
@@ -76,7 +128,7 @@ export default async function Home({
             <TagFilters tags={allTags} />
         </Suspense>
 
-        <PostsGrid tag={currentTag} query={currentQuery} />
+        <PostsGrid tag={currentTag} query={currentQuery} page={currentPage} />
         
       </section>
     </div>
