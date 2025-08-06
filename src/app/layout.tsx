@@ -29,11 +29,11 @@ export default async function RootLayout({
       </head>
       <body className="font-body antialiased" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <div className="flex flex-col min-h-screen">
-            <Navbar tags={allTags} pages={allPages} />
-            <main className="flex-grow pt-28">{children}</main>
-            <Footer pages={allPages} />
-          </div>
+            <div className="flex flex-col min-h-screen">
+                <Navbar tags={allTags} pages={allPages} />
+                <main className="flex-grow pt-28">{children}</main>
+                <Footer pages={allPages} />
+            </div>
         </ThemeProvider>
       </body>
     </html>

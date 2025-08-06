@@ -1,3 +1,4 @@
+
 import { getPostBySlug, getPublishedPages } from '@/lib/posts';
 import { notFound } from 'next/navigation';
 import { PostRenderer } from '@/components/post-renderer';
@@ -13,11 +14,14 @@ type PageProps = {
 
 export async function generateStaticParams() {
     const pages = await getPublishedPages();
-    return pages.map((page) => ({
-      slug: page.slug,
-    }));
+    return pages
+        .filter((page) => page.slug) // Ensure slug is not empty
+        .map((page) => ({
+            slug: page.slug,
+        }));
 }
 
+// Default export for the page component.
 export default async function StaticPage({ params }: PageProps) {
     const { post: page } = await getPostBySlug(params.slug);
 
@@ -37,9 +41,11 @@ export default async function StaticPage({ params }: PageProps) {
                 <h1 className="font-headline text-3xl font-bold leading-tight tracking-tighter md:text-5xl mb-4">
                 {page.title}
                 </h1>
-                <div className="text-muted-foreground text-sm">
-                    <span>Last updated on {format(new Date(page.publishedDate), 'MMMM d, yyyy')}</span>
-                </div>
+                {page.publishedDate && (
+                    <div className="text-muted-foreground text-sm">
+                        <span>Last updated on {format(new Date(page.publishedDate), 'MMMM d, yyyy')}</span>
+                    </div>
+                )}
             </header>
             <PostRenderer recordMap={page.recordMap} />
         </article>
