@@ -64,6 +64,7 @@ async function queryDatabase(filter?: any, sorts?: any) {
         // If a sort or filter property doesn't exist, Notion throws an error.
         // We can catch it and try again without the problematic parts.
         if (error.code === 'validation_error') {
+            console.warn(`Notion API validation error: ${error.message}. Retrying...`);
             if (error.message.includes('sort property')) {
                 // Retry without sorting
                 return queryDatabase(filter, undefined);
