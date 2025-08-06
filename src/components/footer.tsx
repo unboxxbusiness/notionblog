@@ -1,10 +1,9 @@
 import { Icons } from "@/components/ui/icons"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Facebook, Instagram, Linkedin, Twitter, Feather } from "lucide-react"
 import Link from "next/link"
 import type { Post } from "@/lib/posts"
+import { NewsletterForm } from "./newsletter-form"
 
 export function Footer({ pages }: { pages: Post[] }) {
   return (
@@ -49,13 +48,7 @@ export function Footer({ pages }: { pages: Post[] }) {
             </p>
           </div>
           <div className="mb-8 w-full max-w-md">
-            <form className="flex space-x-2">
-              <div className="flex-grow">
-                <Label htmlFor="email-subscribe" className="sr-only">Email</Label>
-                <Input id="email-subscribe" placeholder="Enter your email" type="email" className="rounded-full" />
-              </div>
-              <Button type="submit" className="rounded-full">Subscribe</Button>
-            </form>
+            <NewsletterForm />
           </div>
           <div className="text-center">
             <p className="text-sm text-muted-foreground">
