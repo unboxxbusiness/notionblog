@@ -11,6 +11,8 @@ type PostCardProps = {
 };
 
 export function PostCard({ post }: PostCardProps) {
+  const truncatedExcerpt = post.excerpt.length > 120 ? `${post.excerpt.substring(0, 120)}...` : post.excerpt;
+
   return (
     <Card className="grid grid-rows-[auto_1fr_auto] h-full overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
        <CardHeader className="p-0">
@@ -36,7 +38,7 @@ export function PostCard({ post }: PostCardProps) {
             </Link>
         </h3>
         <p className="text-muted-foreground line-clamp-3 mb-4">
-          {post.excerpt}
+          {truncatedExcerpt}
         </p>
         <p className="text-sm text-muted-foreground">
             {format(new Date(post.publishedDate), 'MMMM d, yyyy')}

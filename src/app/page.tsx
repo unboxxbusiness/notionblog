@@ -18,6 +18,8 @@ async function LatestPostHero() {
   if (!latestPost) {
     return <HomeHero />;
   }
+  
+  const truncatedExcerpt = latestPost.excerpt.length > 120 ? `${latestPost.excerpt.substring(0, 120)}...` : latestPost.excerpt;
 
   return (
     <section className="mb-12">
@@ -36,7 +38,7 @@ async function LatestPostHero() {
                 <div>
                     <Badge variant="default" className="mb-4">Latest Post</Badge>
                     <h2 className="font-headline text-3xl font-bold mb-4">{latestPost.title}</h2>
-                    <p className="text-muted-foreground mb-4 line-clamp-3">{latestPost.excerpt}</p>
+                    <p className="text-muted-foreground mb-4 line-clamp-3">{truncatedExcerpt}</p>
                     <div className="text-sm text-muted-foreground mb-4">
                         {format(new Date(latestPost.publishedDate), 'MMMM d, yyyy')}
                     </div>
