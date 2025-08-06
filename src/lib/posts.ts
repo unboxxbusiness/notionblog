@@ -31,18 +31,18 @@ function pageToPost(page: PageObjectResponse): Post {
         cover = page.cover.external.url;
     }
 
-    const tags = (page.properties.Tags as any)?.multi_select.map((tag: any) => tag.name) || [];
+    const tags = (page.properties.Tags as any)?.multi_select?.map((tag: any) => tag.name) || [];
 
     return {
         id: page.id,
-        title: (page.properties.Title as any).title[0]?.plain_text,
-        slug: (page.properties.Slug as any).rich_text[0]?.plain_text,
+        title: (page.properties.Title as any)?.title?.[0]?.plain_text || '',
+        slug: (page.properties.Slug as any)?.rich_text?.[0]?.plain_text || '',
         tags: tags,
-        author: (page.properties.Author as any).rich_text[0]?.plain_text || 'Anonymous',
-        publishedDate: (page.properties.PublishedDate as any).date?.start,
+        author: (page.properties.Author as any)?.rich_text?.[0]?.plain_text || 'Anonymous',
+        publishedDate: (page.properties.PublishedDate as any)?.date?.start || page.created_time,
         featuredImage: cover || 'https://placehold.co/1200x630.png',
         featuredImageHint: 'notion content',
-        excerpt: (page.properties.Excerpt as any).rich_text[0]?.plain_text || '',
+        excerpt: (page.properties.Excerpt as any)?.rich_text?.[0]?.plain_text || '',
         content: page.id, // We'll fetch content using this ID
     };
 }
@@ -50,15 +50,9 @@ function pageToPost(page: PageObjectResponse): Post {
 export async function getPublishedPosts(): Promise<Post[]> {
   const response: QueryDatabaseResponse = await notionClient.databases.query({
     database_id: databaseId,
-    filter: {
-      property: 'Published',
-      checkbox: {
-        equals: true,
-      },
-    },
     sorts: [
       {
-        property: 'PublishedDate',
+        timestamp: 'created_time',
         direction: 'descending',
       },
     ],
