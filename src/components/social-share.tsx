@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, 'useEffect', 'useState' from 'react';
 import { Twitter, Facebook, Linkedin, Share2 } from 'lucide-react';
 
 interface SocialBoxProps {
@@ -56,8 +56,6 @@ export function SocialShare({ title, slug }: { title:string, slug:string }) {
                 delay={link.delay}
             />
             ))}
-
-            <div className="box box4" style={{ transitionDelay: "0.6s" }} />
         </div>
     </div>
   );
