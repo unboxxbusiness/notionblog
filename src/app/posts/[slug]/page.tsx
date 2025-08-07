@@ -12,6 +12,7 @@ import { RelatedPosts } from './related-posts';
 import { SocialShare } from '@/components/social-share';
 import type { Metadata } from 'next';
 import { getSiteSettings } from '@/lib/settings';
+import { ReadingProgressBar } from '@/components/reading-progress-bar';
 
 type PostPageProps = {
   params: {
@@ -98,6 +99,7 @@ export default async function PostPage({ params }: PostPageProps) {
 
   return (
     <>
+      {isBlogPost && <ReadingProgressBar />}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
