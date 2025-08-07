@@ -1,6 +1,6 @@
 
 import Link from 'next/link';
-import { getPublishedPosts, getAllTags, getLatestPost } from '@/lib/posts';
+import { getPublishedPosts, getAllTags, getLatestPost, getFeaturedPosts } from '@/lib/posts';
 import { PostCard } from '@/components/post-card';
 import { Badge } from '@/components/ui/badge';
 import { TagFilters } from '@/components/tag-filters';
@@ -13,47 +13,49 @@ import { Pagination } from '@/components/pagination';
 import { HomeSidebar } from '@/components/home-sidebar';
 import type { Metadata } from 'next';
 import { getSiteSettings } from '@/lib/settings';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import type { Post } from '@/lib/types';
 
 export async function generateMetadata(): Promise<Metadata> {
     const settings = await getSiteSettings();
+    const title = `${settings.homepageTitle} | ${settings.brandName}`;
     return {
-      title: `${settings.homepageTitle} | ${settings.brandName}`,
+      title: title,
       description: settings.homepageDescription,
+      openGraph: {
+        title: title,
+        description: settings.homepageDescription,
+        type: 'website',
+      }
     };
   }
 
 
 const POSTS_PER_PAGE = 6;
 
-async function LatestPostHero() {
-  const latestPost = await getLatestPost();
-
-  if (!latestPost) {
-    return <HomeHero />;
-  }
-  
-  const truncatedExcerpt = latestPost.excerpt.length > 120 ? `${latestPost.excerpt.substring(0, 120)}...` : latestPost.excerpt;
+function SinglePostHero({ post, isLatest }: { post: Post, isLatest: boolean }) {
+  const truncatedExcerpt = post.excerpt.length > 120 ? `${post.excerpt.substring(0, 120)}...` : post.excerpt;
 
   return (
     <section className="mb-12">
-        <Link href={`/posts/${latestPost.slug}`}>
+        <Link href={`/posts/${post.slug}`}>
             <div className="grid md:grid-cols-2 gap-8 items-center bg-card/50 rounded-lg overflow-hidden p-8 transition-shadow hover:shadow-lg">
                 <div className="relative aspect-[16/9] w-full overflow-hidden rounded-md">
                     <Image
-                        src={latestPost.featuredImage}
-                        alt={latestPost.title}
+                        src={post.featuredImage}
+                        alt={post.title}
                         fill
                         className="object-cover"
                         priority
-                        data-ai-hint={latestPost.featuredImageHint}
+                        data-ai-hint={post.featuredImageHint}
                     />
                 </div>
                 <div>
-                    <Badge variant="default" className="mb-4">Latest Post</Badge>
-                    <h2 className="font-headline text-3xl font-bold mb-4">{latestPost.title}</h2>
+                    <Badge variant="default" className="mb-4">{isLatest ? "Latest Post" : "Featured Post"}</Badge>
+                    <h2 className="font-headline text-3xl font-bold mb-4">{post.title}</h2>
                     <p className="text-muted-foreground mb-4 line-clamp-3">{truncatedExcerpt}</p>
                     <div className="text-sm text-muted-foreground mb-4">
-                        {format(new Date(latestPost.publishedDate), 'MMMM d, yyyy')}
+                        {format(new Date(post.publishedDate), 'MMMM d, yyyy')}
                     </div>
                     <div className="flex items-center text-primary font-semibold">
                         Read more <ArrowRight className="ml-2 size-4" />
@@ -63,6 +65,48 @@ async function LatestPostHero() {
         </Link>
     </section>
   )
+}
+
+function FeaturedPostsCarousel({ posts }: { posts: Post[] }) {
+  return (
+    <section className="mb-12">
+      <Carousel
+        opts={{
+          loop: true,
+        }}
+        className="w-full"
+      >
+        <CarouselContent>
+          {posts.map((post) => (
+            <CarouselItem key={post.id}>
+              <SinglePostHero post={post} isLatest={false} />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        {posts.length > 1 && (
+            <>
+                <CarouselPrevious className="left-2" />
+                <CarouselNext className="right-2" />
+            </>
+        )}
+      </Carousel>
+    </section>
+  );
+}
+
+async function FeaturedOrLatestHero() {
+  let featuredPosts = await getFeaturedPosts();
+
+  if (featuredPosts.length > 0) {
+    return <FeaturedPostsCarousel posts={featuredPosts} />;
+  }
+
+  const latestPost = await getLatestPost();
+  if (!latestPost) {
+    return <HomeHero />;
+  }
+
+  return <SinglePostHero post={latestPost} isLatest={true} />;
 }
 
 function PostsGrid({ tag, query, page }: { tag?: string; query?: string, page: number }) {
@@ -136,7 +180,7 @@ export default async function Home({
   return (
     <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
       <Suspense fallback={<div className="h-28" />}>
-        <LatestPostHero />
+        <FeaturedOrLatestHero />
       </Suspense>
 
       <div className="grid lg:grid-cols-3 gap-12">

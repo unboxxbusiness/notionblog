@@ -32,6 +32,7 @@ function pageToPost(page: PageObjectResponse): Post {
         excerpt: (page.properties.Excerpt as any)?.rich_text?.[0]?.plain_text || '',
         content: page.id, // We'll fetch content using this ID
         type: type === 'page' ? 'page' : 'post',
+        featured: (page.properties.Featured as any)?.checkbox || false,
     };
 }
 
@@ -78,6 +79,26 @@ async function queryDatabase(
         return { results: [], next_cursor: null, has_more: false, type: 'page_or_database', page_or_database: {} };
     }
 }
+
+export const getFeaturedPosts = cache(async (): Promise<Post[]> => {
+    try {
+        const response = await queryDatabase(
+            { and: [
+                { property: 'Type', select: { equals: 'post' } },
+                { property: 'Status', status: { equals: 'Published' } },
+                { property: 'Featured', checkbox: { equals: true } },
+            ]},
+            [{ property: 'PublishedDate', direction: 'descending' }],
+            5 // Max 5 featured posts
+        );
+        return response.results
+            .filter((p): p is PageObjectResponse => 'properties' in p)
+            .map(pageToPost);
+    } catch (e) {
+        console.error("Could not fetch featured posts.", e);
+        return [];
+    }
+}, ['featured_posts'], { revalidate: 3600 });
 
 
 export const getPublishedPosts = cache(async ({ 

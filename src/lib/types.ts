@@ -13,6 +13,7 @@ export type Post = {
     recordMap?: RecordMap;
     excerpt: string;
     type: 'post' | 'page';
+    featured: boolean;
 };
 
 export type PaginatedPosts = {
