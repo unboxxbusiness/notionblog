@@ -6,8 +6,14 @@ import { Facebook, Instagram, Linkedin, Twitter, Feather } from "lucide-react"
 import Link from "next/link"
 import type { Post } from "@/lib/types"
 import { NewsletterForm } from "./newsletter-form"
+import type { SiteSettings } from "@/lib/settings";
 
-export function Footer({ pages = [], brandName = 'Muse' }: { pages?: Post[], brandName?: string }) {
+interface FooterProps {
+  pages?: Post[];
+  settings: SiteSettings;
+}
+
+export function Footer({ pages = [], settings }: FooterProps) {
 
   return (
     <footer className="bg-background py-12 border-t">
@@ -27,25 +33,41 @@ export function Footer({ pages = [], brandName = 'Muse' }: { pages?: Post[], bra
             ))}
           </nav>
           <div className="mb-8 flex space-x-4">
-            <Button variant="outline" size="icon" className="rounded-full">
-              <Facebook className="h-4 w-4" />
-              <span className="sr-only">Facebook</span>
-            </Button>
-            <Button variant="outline" size="icon" className="rounded-full">
-              <Twitter className="h-4 w-4" />
-              <span className="sr-only">Twitter</span>
-            </Button>
-            <Button variant="outline" size="icon" className="rounded-full">
-              <Instagram className="h-4 w-4" />
-              <span className="sr-only">Instagram</span>
-            </Button>
-            <Button variant="outline" size="icon" className="rounded-full">
-              <Linkedin className="h-4 w-4" />
-              <span className="sr-only">LinkedIn</span>
-            </Button>
+            {settings.facebookUrl && (
+              <a href={settings.facebookUrl} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="icon" className="rounded-full">
+                  <Facebook className="h-4 w-4" />
+                  <span className="sr-only">Facebook</span>
+                </Button>
+              </a>
+            )}
+            {settings.twitterUrl && (
+              <a href={settings.twitterUrl} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="icon" className="rounded-full">
+                  <Twitter className="h-4 w-4" />
+                  <span className="sr-only">Twitter</span>
+                </Button>
+              </a>
+            )}
+            {settings.instagramUrl && (
+                <a href={settings.instagramUrl} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" size="icon" className="rounded-full">
+                        <Instagram className="h-4 w-4" />
+                        <span className="sr-only">Instagram</span>
+                    </Button>
+                </a>
+            )}
+            {settings.linkedinUrl && (
+                <a href={settings.linkedinUrl} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" size="icon" className="rounded-full">
+                        <Linkedin className="h-4 w-4" />
+                        <span className="sr-only">LinkedIn</span>
+                    </Button>
+                </a>
+            )}
           </div>
           <div className="text-center mb-6">
-            <h3 className="font-headline text-2xl font-bold">Join the {brandName} Community</h3>
+            <h3 className="font-headline text-2xl font-bold">Join the {settings.brandName} Community</h3>
             <p className="text-muted-foreground mt-2 max-w-md mx-auto">
                 Subscribe to our newsletter for the latest articles, insights, and a dose of creative inspiration delivered to your inbox.
             </p>
@@ -55,7 +77,7 @@ export function Footer({ pages = [], brandName = 'Muse' }: { pages?: Post[], bra
           </div>
           <div className="text-center">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} {brandName}. All rights reserved.
+              © {new Date().getFullYear()} {settings.brandName}. All rights reserved.
             </p>
           </div>
         </div>

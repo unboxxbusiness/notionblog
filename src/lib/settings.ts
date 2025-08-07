@@ -2,12 +2,15 @@
 import 'server-only';
 import { Client } from '@notionhq/client';
 import { cache } from 'react';
-import type { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
-interface SiteSettings {
+export interface SiteSettings {
     brandName: string;
     homepageTitle: string;
     homepageDescription: string;
+    twitterUrl?: string;
+    linkedinUrl?: string;
+    facebookUrl?: string;
+    instagramUrl?: string;
 }
 
 const DEFAULTS: SiteSettings = {
@@ -44,12 +47,30 @@ export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
             const key = (page.properties.Title as any)?.title?.[0]?.plain_text;
             const value = (page.properties.Excerpt as any)?.rich_text?.[0]?.plain_text;
 
-            if (key === 'brandName' && value) {
-                settings.brandName = value;
-            } else if (key === 'homepageTitle' && value) {
-                settings.homepageTitle = value;
-            } else if (key === 'homepageDescription' && value) {
-                settings.homepageDescription = value;
+            if (!key || !value) continue;
+
+            switch (key) {
+                case 'brandName':
+                    settings.brandName = value;
+                    break;
+                case 'homepageTitle':
+                    settings.homepageTitle = value;
+                    break;
+                case 'homepageDescription':
+                    settings.homepageDescription = value;
+                    break;
+                case 'twitterUrl':
+                    settings.twitterUrl = value;
+                    break;
+                case 'linkedinUrl':
+                    settings.linkedinUrl = value;
+                    break;
+                case 'facebookUrl':
+                    settings.facebookUrl = value;
+                    break;
+                case 'instagramUrl':
+                    settings.instagramUrl = value;
+                    break;
             }
         }
         
