@@ -10,7 +10,7 @@ import { Pagination } from '@/components/pagination';
 import { HomeSidebar } from '@/components/home-sidebar';
 import type { Metadata } from 'next';
 import { getSiteSettings } from '@/lib/settings';
-import { AttractiveCarousel } from '@/components/attractive-carousel';
+import { TestimonialCarousel } from '@/components/testimonial-carousel';
 import type { Post } from '@/lib/types';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -43,15 +43,16 @@ async function FeaturedOrLatestHero() {
   }
 
   const slides = featuredPosts.map(post => ({
-    title: post.title,
-    button: 'Read more',
+    quote: post.excerpt,
+    name: post.title,
+    designation: post.author,
     src: post.featuredImage,
-    href: `/posts/${post.slug}`,
+    href: `/posts/${post.slug}`
   }));
 
   return (
-    <section className="mb-24 mt-8">
-        <AttractiveCarousel slides={slides} />
+    <section className="mb-12">
+        <TestimonialCarousel testimonials={slides} />
     </section>
   );
 }
@@ -133,6 +134,7 @@ export default async function Home({
 
       <div className="grid lg:grid-cols-3 gap-12">
         <section className="lg:col-span-2">
+            <h2 className="font-headline text-3xl font-bold text-center mb-8">Latest Posts</h2>
             <Suspense fallback={null}>
                 <TagFilters tags={allTags} />
             </Suspense>
