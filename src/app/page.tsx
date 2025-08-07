@@ -42,13 +42,19 @@ async function FeaturedOrLatestHero() {
     }
   }
 
-  const slides = featuredPosts.map(post => ({
-    quote: post.excerpt,
-    name: post.title,
-    designation: post.author,
-    src: post.featuredImage,
-    href: `/posts/${post.slug}`
-  }));
+  const slides = featuredPosts.map(post => {
+    const truncatedExcerpt = post.excerpt.length > 120
+    ? `${post.excerpt.substring(0, 120)}...`
+    : post.excerpt;
+
+    return {
+        quote: truncatedExcerpt,
+        name: post.title,
+        designation: post.author,
+        src: post.featuredImage,
+        href: `/posts/${post.slug}`
+    }
+  });
 
   return (
     <section className="mb-12">
