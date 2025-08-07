@@ -6,11 +6,17 @@ import './social-card.css';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { getAllTags, getPublishedPages } from '@/lib/posts';
+import { getSiteSettings } from '@/lib/settings';
 
-export const metadata: Metadata = {
-    title: 'Muse',
-    description: 'A blog for creative minds and curious souls.',
-  };
+export async function generateMetadata(): Promise<Metadata> {
+    const settings = await getSiteSettings();
+    const brandName = settings.brandName || 'Muse';
+    return {
+        title: brandName,
+        description: 'A blog for creative minds and curious souls.',
+    };
+}
+
 
 export default async function RootLayout({
   children,
@@ -19,6 +25,9 @@ export default async function RootLayout({
 }>) {
   const allTags = await getAllTags();
   const allPages = await getPublishedPages();
+  const settings = await getSiteSettings();
+  const brandName = settings.brandName || 'Muse';
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -30,12 +39,13 @@ export default async function RootLayout({
       <body className="font-body antialiased" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <div className="flex flex-col min-h-screen">
-                <Navbar tags={allTags} pages={allPages} />
+                <Navbar tags={allTags} pages={allPages} brandName={brandName} />
                 <main className="flex-grow pt-28">{children}</main>
-                <Footer pages={allPages} />
+                <Footer pages={allPages} brandName={brandName} />
             </div>
         </ThemeProvider>
       </body>
     </html>
   );
 }
+

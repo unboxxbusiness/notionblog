@@ -12,11 +12,16 @@ import { ArrowRight } from 'lucide-react';
 import { Pagination } from '@/components/pagination';
 import { HomeSidebar } from '@/components/home-sidebar';
 import type { Metadata } from 'next';
+import { getSiteSettings } from '@/lib/settings';
 
-export const metadata: Metadata = {
-  title: 'Muse | A Blog for Creative Minds and Curious Souls',
-  description: 'Explore topics in design, development, and AI. A blog for creative minds and curious souls.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const settings = await getSiteSettings();
+    const brandName = settings.brandName || 'Muse';
+    return {
+      title: `${brandName} | A Blog for Creative Minds and Curious Souls`,
+      description: 'Explore topics in design, development, and AI. A blog for creative minds and curious souls.',
+    };
+  }
 
 
 const POSTS_PER_PAGE = 6;

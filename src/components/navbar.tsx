@@ -105,9 +105,11 @@ const HoveredLink = ({ children, icon, ...rest }: any) => {
 export function Navbar({
   tags = [],
   pages = [],
+  brandName = 'Muse'
 }: {
   tags?: string[]
   pages?: Post[]
+  brandName?: string;
 }) {
   const [active, setActive] = useState<string | null>(null)
 
@@ -120,7 +122,7 @@ export function Navbar({
             href="/"
             className="cursor-pointer text-foreground hover:opacity-[0.9] flex items-center font-bold font-headline text-lg"
           >
-            Muse
+            {brandName}
           </Link>
           <MenuItem setActive={setActive} active={active} item="Tags">
             <div className="flex flex-col space-y-4 text-sm">
@@ -161,7 +163,7 @@ export function Navbar({
           href="/"
           className="cursor-pointer text-foreground hover:opacity-[0.9] flex items-center font-bold font-headline text-lg"
         >
-          Muse
+          {brandName}
         </Link>
         <div className="flex items-center gap-2">
           <ThemeToggle />

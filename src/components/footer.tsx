@@ -7,7 +7,7 @@ import Link from "next/link"
 import type { Post } from "@/lib/types"
 import { NewsletterForm } from "./newsletter-form"
 
-export function Footer({ pages = [] }: { pages?: Post[] }) {
+export function Footer({ pages = [], brandName = 'Muse' }: { pages?: Post[], brandName?: string }) {
 
   return (
     <footer className="bg-background py-12 border-t">
@@ -45,7 +45,7 @@ export function Footer({ pages = [] }: { pages?: Post[] }) {
             </Button>
           </div>
           <div className="text-center mb-6">
-            <h3 className="font-headline text-2xl font-bold">Join the Muse Community</h3>
+            <h3 className="font-headline text-2xl font-bold">Join the {brandName} Community</h3>
             <p className="text-muted-foreground mt-2 max-w-md mx-auto">
                 Subscribe to our newsletter for the latest articles, insights, and a dose of creative inspiration delivered to your inbox.
             </p>
@@ -55,7 +55,7 @@ export function Footer({ pages = [] }: { pages?: Post[] }) {
           </div>
           <div className="text-center">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Muse. All rights reserved.
+              © {new Date().getFullYear()} {brandName}. All rights reserved.
             </p>
           </div>
         </div>

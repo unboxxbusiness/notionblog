@@ -11,6 +11,7 @@ import { PostRenderer } from '@/components/post-renderer';
 import { RelatedPosts } from './related-posts';
 import { SocialShare } from '@/components/social-share';
 import type { Metadata } from 'next';
+import { getSiteSettings } from '@/lib/settings';
 
 type PostPageProps = {
   params: {
@@ -20,6 +21,9 @@ type PostPageProps = {
 
 export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
   const { post } = await getPostBySlug(params.slug);
+  const settings = await getSiteSettings();
+  const brandName = settings.brandName || 'Muse';
+
   if (!post) {
     return {
       title: 'Page not found',
@@ -30,7 +34,7 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
   const canonicalUrl = `${siteUrl}/posts/${post.slug}`;
 
   return {
-    title: `${post.title} | Muse`,
+    title: `${post.title} | ${brandName}`,
     description: post.excerpt,
     alternates: {
       canonical: canonicalUrl,
