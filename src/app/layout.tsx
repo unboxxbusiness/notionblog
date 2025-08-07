@@ -26,7 +26,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const allTags = await getAllTags();
-  const allPages = await getPublishedPages();
+  const corePages = await getPublishedPages({ category: 'Core' });
+  const legalPages = await getPublishedPages({ category: 'Legal' });
   const settings = await getSiteSettings();
 
   return (
@@ -40,9 +41,9 @@ export default async function RootLayout({
       <body className="font-body antialiased" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <div className="flex flex-col min-h-screen">
-                <Navbar tags={allTags} pages={allPages} brandName={settings.brandName} />
+                <Navbar tags={allTags} pages={corePages} brandName={settings.brandName} />
                 <main className="flex-grow pt-28">{children}</main>
-                <Footer pages={allPages} settings={settings} />
+                <Footer corePages={corePages} legalPages={legalPages} settings={settings} />
             </div>
         </ThemeProvider>
       </body>

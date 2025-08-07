@@ -14,6 +14,7 @@ export type Post = {
     excerpt: string;
     type: 'post' | 'page';
     featured: boolean;
+    pageCategory?: 'Core' | 'Legal';
 };
 
 export type PaginatedPosts = {

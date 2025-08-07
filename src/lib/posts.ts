@@ -19,6 +19,7 @@ function pageToPost(page: PageObjectResponse): Post {
 
     const tags = (page.properties.Tags as any)?.multi_select?.map((tag: any) => tag.name) || [];
     const type = (page.properties.Type as any)?.select?.name;
+    const pageCategory = (page.properties.PageCategory as any)?.select?.name;
 
     return {
         id: page.id,
@@ -33,6 +34,7 @@ function pageToPost(page: PageObjectResponse): Post {
         content: page.id, // We'll fetch content using this ID
         type: type === 'page' ? 'page' : 'post',
         featured: (page.properties.Featured as any)?.checkbox || false,
+        pageCategory: pageCategory,
     };
 }
 
@@ -177,21 +179,25 @@ export const getLatestPost = cache(async (): Promise<Post | null> => {
 }, ['latest_post'], { revalidate: 3600 });
 
 
-export const getPublishedPages = cache(async (): Promise<Post[]> => {
-  try {
-    const response = await queryDatabase({
-        and: [
-            { property: 'Type', select: { equals: 'page' } },
-            { property: 'Status', status: { equals: 'Published' } }
-        ]
-    });
-    return response.results
-        .filter((p): p is PageObjectResponse => 'properties' in p)
-        .map(pageToPost);
-  } catch(e) {
-    console.error("Could not fetch published pages.", e);
-    return [];
-  }
+export const getPublishedPages = cache(async ({ category }: { category?: 'Core' | 'Legal' } = {}): Promise<Post[]> => {
+    const filters: any[] = [
+        { property: 'Type', select: { equals: 'page' } },
+        { property: 'Status', status: { equals: 'Published' } }
+    ];
+
+    if (category) {
+        filters.push({ property: 'PageCategory', select: { equals: category } });
+    }
+
+    try {
+        const response = await queryDatabase({ and: filters });
+        return response.results
+            .filter((p): p is PageObjectResponse => 'properties' in p)
+            .map(pageToPost);
+    } catch(e) {
+        console.error("Could not fetch published pages.", e);
+        return [];
+    }
 }, ['published_pages'], { revalidate: 3600 });
 
 export const getPostBySlug = cache(async (slug: string): Promise<{ post: Post | null, relatedPosts: Post[] }> => {

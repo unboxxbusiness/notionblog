@@ -7,13 +7,15 @@ import Link from "next/link"
 import type { Post } from "@/lib/types"
 import { NewsletterForm } from "./newsletter-form"
 import type { SiteSettings } from "@/lib/settings";
+import { Separator } from "./ui/separator";
 
 interface FooterProps {
-  pages?: Post[];
+  corePages?: Post[];
+  legalPages?: Post[];
   settings: SiteSettings;
 }
 
-export function Footer({ pages = [], settings }: FooterProps) {
+export function Footer({ corePages = [], legalPages = [], settings }: FooterProps) {
 
   return (
     <footer className="bg-background py-12 border-t">
@@ -26,7 +28,7 @@ export function Footer({ pages = [], settings }: FooterProps) {
           </div>
           <nav className="mb-8 flex flex-wrap justify-center gap-6">
             <Link href="/" className="hover:text-primary transition-colors">Home</Link>
-            {pages.map((page) => (
+            {corePages.map((page) => (
               <Link key={page.id} href={`/${page.slug}`} className="hover:text-primary transition-colors">
                 {page.title}
               </Link>
@@ -75,10 +77,22 @@ export function Footer({ pages = [], settings }: FooterProps) {
           <div className="mb-8 w-full max-w-md">
             <NewsletterForm />
           </div>
-          <div className="text-center">
+
+          <Separator className="my-8 w-full max-w-3xl" />
+          
+          <div className="text-center w-full flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} {settings.brandName}. All rights reserved.
             </p>
+            {legalPages.length > 0 && (
+                <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+                    {legalPages.map((page) => (
+                        <Link key={page.id} href={`/${page.slug}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                            {page.title}
+                        </Link>
+                    ))}
+                </nav>
+            )}
           </div>
         </div>
       </div>
