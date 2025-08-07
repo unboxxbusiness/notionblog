@@ -137,7 +137,7 @@ export function Navbar({
               ))}
             </div>
           </MenuItem>
-          <MenuItem setActive={setActive} active={active} item="Sections">
+          <MenuItem setActive={setActive} active={active} item="Know Us">
             <div className="flex flex-col space-y-4 text-sm">
               {pages.map(page => (
                 <HoveredLink
@@ -200,7 +200,7 @@ export function Navbar({
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="pages">
-                    <AccordionTrigger>Sections</AccordionTrigger>
+                    <AccordionTrigger>Know Us</AccordionTrigger>
                     <AccordionContent>
                     <div className="flex flex-col space-y-4 text-sm mt-2">
                         {pages.map(page => (
