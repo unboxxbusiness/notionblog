@@ -16,10 +16,9 @@ import { getSiteSettings } from '@/lib/settings';
 
 export async function generateMetadata(): Promise<Metadata> {
     const settings = await getSiteSettings();
-    const brandName = settings.brandName || 'Muse';
     return {
-      title: `${brandName} | A Blog for Creative Minds and Curious Souls`,
-      description: 'Explore topics in design, development, and AI. A blog for creative minds and curious souls.',
+      title: `${settings.homepageTitle} | ${settings.brandName}`,
+      description: settings.homepageDescription,
     };
   }
 

@@ -9,10 +9,13 @@ import { getAllTags, getPublishedPages } from '@/lib/posts';
 import { getSiteSettings } from '@/lib/settings';
 
 export async function generateMetadata(): Promise<Metadata> {
-    const { brandName } = await getSiteSettings();
+    const { brandName, homepageTitle, homepageDescription } = await getSiteSettings();
     return {
-        title: brandName,
-        description: 'A blog for creative minds and curious souls.',
+        title: {
+            default: `${homepageTitle} | ${brandName}`,
+            template: `%s | ${brandName}`,
+        },
+        description: homepageDescription,
     };
 }
 
