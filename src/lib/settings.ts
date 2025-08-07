@@ -3,17 +3,15 @@ import 'server-only';
 import { Client } from '@notionhq/client';
 import { cache } from 'react';
 
-export const getSiteSettings = cache(async (): Promise<{ [key: string]: string }> => {
+const DEFAULT_BRAND_NAME = 'Muse';
+
+export const getSiteSettings = cache(async (): Promise<{ brandName: string }> => {
     const notionClient = process.env.NOTION_POSTS_API_KEY ? new Client({ auth: process.env.NOTION_POSTS_API_KEY }) : null;
     const databaseId = process.env.NOTION_POSTS_DATABASE_ID;
 
-    const defaultSettings = {
-        brandName: 'Muse'
-    };
-
     if (!notionClient || !databaseId) {
-        console.warn('Posts Notion database is not configured. Using default values for site settings.');
-        return defaultSettings;
+        console.warn('Posts Notion database is not configured. Using default brand name.');
+        return { brandName: DEFAULT_BRAND_NAME };
     }
 
     try {
@@ -25,29 +23,23 @@ export const getSiteSettings = cache(async (): Promise<{ [key: string]: string }
                     equals: 'setting',
                 },
             },
+            page_size: 1, // We only need one setting entry for the brand name
         });
         
-        if (response.results.length === 0) {
-            console.warn("No 'setting' type found in the database. Using default brand name.");
-            return defaultSettings;
+        const settingPage = response.results[0];
+
+        if (settingPage && 'properties' in settingPage) {
+            const brandName = (settingPage.properties.Title as any)?.title?.[0]?.plain_text;
+            if (brandName) {
+                return { brandName };
+            }
         }
 
-        const settings = response.results.reduce((acc, page) => {
-            if ('properties' in page) {
-                const key = (page.properties.Title as any)?.title?.[0]?.plain_text;
-                // Using Excerpt property to store the value for the setting
-                const value = (page.properties.Excerpt as any)?.rich_text?.[0]?.plain_text;
-                if (key && value) {
-                    acc[key] = value;
-                }
-            }
-            return acc;
-        }, {} as { [key: string]: string });
-
-        return { ...defaultSettings, ...settings };
+        console.warn("No 'setting' type entry found with a Title. Using default brand name.");
+        return { brandName: DEFAULT_BRAND_NAME };
 
     } catch (error) {
         console.error('Failed to fetch site settings from Notion:', error);
-        return defaultSettings;
+        return { brandName: DEFAULT_BRAND_NAME };
     }
 }, ['site_settings'], { revalidate: 60 });

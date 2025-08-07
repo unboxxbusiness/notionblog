@@ -9,8 +9,7 @@ import { getAllTags, getPublishedPages } from '@/lib/posts';
 import { getSiteSettings } from '@/lib/settings';
 
 export async function generateMetadata(): Promise<Metadata> {
-    const settings = await getSiteSettings();
-    const brandName = settings.brandName || 'Muse';
+    const { brandName } = await getSiteSettings();
     return {
         title: brandName,
         description: 'A blog for creative minds and curious souls.',
@@ -25,8 +24,7 @@ export default async function RootLayout({
 }>) {
   const allTags = await getAllTags();
   const allPages = await getPublishedPages();
-  const settings = await getSiteSettings();
-  const brandName = settings.brandName || 'Muse';
+  const { brandName } = await getSiteSettings();
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -48,4 +46,3 @@ export default async function RootLayout({
     </html>
   );
 }
-
