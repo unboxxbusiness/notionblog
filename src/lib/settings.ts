@@ -3,7 +3,7 @@ import 'server-only';
 import { Client } from '@notionhq/client';
 import { cache } from 'react';
 
-export const getSiteSettings = async (): Promise<{ [key: string]: string }> => {
+export const getSiteSettings = cache(async (): Promise<{ [key: string]: string }> => {
     const notionClient = process.env.NOTION_POSTS_API_KEY ? new Client({ auth: process.env.NOTION_POSTS_API_KEY }) : null;
     const databaseId = process.env.NOTION_POSTS_DATABASE_ID;
 
@@ -26,8 +26,9 @@ export const getSiteSettings = async (): Promise<{ [key: string]: string }> => {
                 },
             },
         });
-
+        
         if (response.results.length === 0) {
+            console.warn("No 'setting' type found in the database. Using default brand name.");
             return defaultSettings;
         }
 
@@ -49,4 +50,4 @@ export const getSiteSettings = async (): Promise<{ [key: string]: string }> => {
         console.error('Failed to fetch site settings from Notion:', error);
         return defaultSettings;
     }
-};
+}, ['site_settings'], { revalidate: 60 });
