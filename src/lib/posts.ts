@@ -197,6 +197,12 @@ export const getPostBySlug = cache(async (slug: string): Promise<{ post: Post | 
             equals: 'Published',
           },
         },
+        {
+            property: 'Type',
+            select: {
+                does_not_equal: 'setting'
+            }
+        }
       ],
     },
   });
