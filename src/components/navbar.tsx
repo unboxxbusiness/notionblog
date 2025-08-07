@@ -124,7 +124,7 @@ export function Navbar({
           >
             {brandName}
           </Link>
-          <MenuItem setActive={setActive} active={active} item="Tags">
+          <MenuItem setActive={setActive} active={active} item="Topics">
             <div className="flex flex-col space-y-4 text-sm">
               {tags.map(tag => (
                 <HoveredLink
@@ -184,7 +184,7 @@ export function Navbar({
                 </div>
                 <Accordion type="multiple" className="w-full">
                   <AccordionItem value="tags">
-                    <AccordionTrigger>Tags</AccordionTrigger>
+                    <AccordionTrigger>Topics</AccordionTrigger>
                     <AccordionContent>
                       <div className="flex flex-col space-y-4 text-sm mt-2">
                         {tags.map(tag => (
