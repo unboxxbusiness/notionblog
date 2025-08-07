@@ -22,6 +22,11 @@ export function TestimonialCarousel({
   autoplay?: boolean;
 }) {
   const [active, setActive] = useState(0);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleNext = React.useCallback(() => {
     setActive((prev) => (prev + 1) % testimonials.length);
@@ -40,6 +45,10 @@ export function TestimonialCarousel({
   const isActive = (index: number) => index === active;
 
   const randomRotate = () => `${Math.floor(Math.random() * 16) - 8}deg`;
+
+  if (!isMounted) {
+      return null;
+  }
 
   return (
     <div className="mx-auto max-w-sm px-4 py-12 font-sans antialiased md:max-w-4xl md:px-8 lg:px-12">
