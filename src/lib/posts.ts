@@ -20,6 +20,8 @@ function pageToPost(page: PageObjectResponse): Post {
     const tags = (page.properties.Tags as any)?.multi_select?.map((tag: any) => tag.name) || [];
     const type = (page.properties.Type as any)?.select?.name;
     const pageCategory = (page.properties.PageCategory as any)?.select?.name;
+    const order = (page.properties.Order as any)?.number;
+
 
     return {
         id: page.id,
@@ -35,6 +37,7 @@ function pageToPost(page: PageObjectResponse): Post {
         type: type === 'page' ? 'page' : 'post',
         featured: (page.properties.Featured as any)?.checkbox || false,
         pageCategory: pageCategory,
+        order: order || undefined,
     };
 }
 
@@ -190,7 +193,10 @@ export const getPublishedPages = cache(async ({ category }: { category?: 'Core' 
     }
 
     try {
-        const response = await queryDatabase({ and: filters });
+        const response = await queryDatabase(
+            { and: filters },
+            [{ property: 'Order', direction: 'ascending' }]
+        );
         return response.results
             .filter((p): p is PageObjectResponse => 'properties' in p)
             .map(pageToPost);

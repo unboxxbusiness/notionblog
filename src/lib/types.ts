@@ -15,6 +15,7 @@ export type Post = {
     type: 'post' | 'page';
     featured: boolean;
     pageCategory?: 'Core' | 'Legal';
+    order?: number;
 };
 
 export type PaginatedPosts = {
